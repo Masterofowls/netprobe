@@ -1,0 +1,13 @@
+node_modules/
+android/
+ios/
+.expo/
+venv*/
+*.apk
+*.keystore
+*.log
+.npmrc
+.git/
+.github/
+memory-bank/
+.copilot/

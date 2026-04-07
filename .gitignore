@@ -47,3 +47,6 @@ yarn-error.*
 # Memory bank
 memory-bank/
 .copilot/
+
+# Auth tokens
+.npmrc
