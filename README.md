@@ -6,7 +6,7 @@ Test if web services are blocked, regionally unavailable, or experiencing issues
 
 ## Features
 
-- **11 Built-in Resources**: Cloudflare, Google, Meta, AWS, Vercel, Microsoft, Apple, Alibaba Cloud, IBM Cloud, GitHub, GitLab
+- **11 Built-in Resources**: Cloudflare, Google, Meta, AWS, Vercel, Microsoft, Apple, DigitalOcean, IBM Cloud, GitHub, GitLab
 - **Custom Resources**: Add your own URLs to monitor
 - **Real-time Connectivity Checks**: HEAD requests with timeout detection and status derivation
 - **8 Status States**: Online, Offline, Timeout, DNS Error, SSL Error, Blocked, Degraded, Unknown
@@ -70,6 +70,24 @@ app/
   resource/[id].tsx # Resource detail view
 ```
 
+## Packages
+
+NetProbe is published to [GitHub Packages](https://github.com/Masterofowls/netprobe/packages).
+
+```bash
+# Install from GitHub Packages registry
+npm install @masterofowls/netprobe --registry=https://npm.pkg.github.com
+```
+
+Release APKs are also attached to each [GitHub Release](https://github.com/Masterofowls/netprobe/releases).
+
+## CI/CD
+
+A GitHub Actions workflow (`.github/workflows/build.yml`) runs on every version tag:
+- Publishes the npm package to GitHub Packages
+- Builds a signed release APK
+- Attaches the APK to the GitHub Release
+
 ## License
 
-MIT
+[MIT](LICENSE) © Masterofowls

@@ -1,7 +1,17 @@
 {
-  "name": "access_app",
-  "version": "1.0.0",
+  "name": "@masterofowls/netprobe",
+  "version": "1.1.0",
+  "description": "Real-time Network Resource Connectivity Tester for Android",
   "main": "expo-router/entry",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Masterofowls/netprobe.git"
+  },
+  "license": "MIT",
+  "author": "Masterofowls",
+  "publishConfig": {
+    "@masterofowls:registry": "https://npm.pkg.github.com"
+  },
   "scripts": {
     "start": "expo start",
     "android": "expo run:android",
@@ -37,6 +47,5 @@
     "@biomejs/biome": "^2.4.10",
     "@types/react": "~19.1.0",
     "typescript": "~5.9.2"
-  },
-  "private": true
+  }
 }
