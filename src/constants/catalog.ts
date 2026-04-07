@@ -97,7 +97,7 @@ export const RESOURCE_CATALOG: CatalogEntry[] = [
   {
     id: "microsoft-azure",
     name: "Microsoft Azure",
-    url: "https://azure.microsoft.com",
+    url: "https://azure.microsoft.com/en-us/",
     icon: "microsoft-azure",
     color: "#0078D4",
     category: "Cloud & Hosting",
@@ -347,7 +347,7 @@ export const RESOURCE_CATALOG: CatalogEntry[] = [
   {
     id: "whatsapp",
     name: "WhatsApp",
-    url: "https://web.whatsapp.com",
+    url: "https://www.whatsapp.com",
     icon: "whatsapp",
     color: "#25D366",
     category: "Messaging",
