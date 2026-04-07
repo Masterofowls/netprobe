@@ -33,6 +33,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   loadData: async () => {
     try {
+      console.log("[NetProbe] Loading persisted data...");
       const [resourcesJson, settingsJson] = await Promise.all([
         AsyncStorage.getItem(STORAGE_KEYS.RESOURCES),
         AsyncStorage.getItem(STORAGE_KEYS.SETTINGS),
@@ -49,7 +50,11 @@ export const useAppStore = create<AppState>((set, get) => ({
         resources: [...DEFAULT_RESOURCES, ...customResources],
         settings: { ...DEFAULT_SETTINGS, ...savedSettings },
       });
+      console.log(
+        `[NetProbe] Loaded ${customResources.length} custom resources`,
+      );
     } catch {
+      console.warn('[NetProbe] Failed to load data, using defaults');
       // Use defaults on error
     }
   },
@@ -143,6 +148,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     const { resources, settings, isChecking } = get();
     if (isChecking) return;
 
+    console.log(`[NetProbe] Checking all ${resources.length} resources...`);
     set({ isChecking: true });
 
     set({

@@ -7,6 +7,7 @@ export const checkResource = async (
   timeout: number = 10000,
   resourceId?: string,
 ): Promise<CheckResult> => {
+  console.log(`[NetProbe] Checking ${url}...`);
   if (resourceId) {
     const existing = CONTROLLER_MAP.get(resourceId);
     if (existing) {
@@ -23,16 +24,19 @@ export const checkResource = async (
 
   try {
     const response = await fetch(url, {
-      method: 'HEAD',
+      method: "HEAD",
       signal: controller.signal,
       headers: {
-        'User-Agent': 'NetProbe/1.0',
+        "User-Agent": "NetProbe/1.0",
       },
-      redirect: 'follow',
+      redirect: "follow",
     });
 
     const latency = Date.now() - startTime;
     const status = deriveStatus(response.status, latency, timeout);
+    console.log(
+      `[NetProbe] ${url} -> ${status} (${response.status}) ${latency}ms`,
+    );
 
     return {
       status,
@@ -43,10 +47,10 @@ export const checkResource = async (
   } catch (error: unknown) {
     const latency = Date.now() - startTime;
 
-    if (error instanceof Error && error.name === 'AbortError') {
+    if (error instanceof Error && error.name === "AbortError") {
       if (latency >= timeout) {
         return {
-          status: 'timeout',
+          status: "timeout",
           latency,
           statusCode: null,
           timestamp: Date.now(),
@@ -54,17 +58,18 @@ export const checkResource = async (
         };
       }
       return {
-        status: 'unknown',
+        status: "unknown",
         latency: null,
         statusCode: null,
         timestamp: Date.now(),
-        errorMessage: 'Request cancelled',
+        errorMessage: "Request cancelled",
       };
     }
 
     const errorMessage =
-      error instanceof Error ? error.message : 'Unknown error';
+      error instanceof Error ? error.message : "Unknown error";
     const status = deriveErrorStatus(errorMessage);
+    console.error(`[NetProbe] ${url} -> ERROR: ${status} - ${errorMessage}`);
 
     return {
       status,

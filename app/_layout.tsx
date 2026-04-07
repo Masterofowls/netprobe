@@ -21,7 +21,9 @@ export default function RootLayout() {
 
   useEffect(() => {
     const init = async () => {
+      console.log("[NetProbe] Initializing app...");
       await loadData();
+      console.log("[NetProbe] Data loaded, app ready");
       setReady(true);
       await SplashScreen.hideAsync();
     };
