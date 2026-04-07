@@ -13,7 +13,8 @@ import { ResourceCard } from '../src/components/ResourceCard';
 import { StatusSummary } from '../src/components/StatusSummary';
 import { useAutoRefresh } from '../src/hooks/useAutoRefresh';
 import { useAppStore } from '../src/store/useAppStore';
-import type { Resource } from '../src/types';
+import { hapticLight } from "../src/services/haptics";
+import type { Resource } from "../src/types";
 
 export default function DashboardScreen() {
   const theme = useTheme();
@@ -23,9 +24,11 @@ export default function DashboardScreen() {
     isChecking,
     checkAllResources,
     lastFullCheck,
+    networkState,
+    settings,
   } = useAppStore();
 
-  const [searchQuery, setSearchQuery] = React.useState('');
+  const [searchQuery, setSearchQuery] = React.useState("");
   const [isExtended, setIsExtended] = React.useState(true);
 
   useAutoRefresh();
@@ -51,29 +54,34 @@ export default function DashboardScreen() {
     ({ item }: { item: Resource }) => (
       <ResourceCard
         resource={item}
-        onPress={() => router.push(`/resource/${item.id}`)}
+        onPress={() => {
+          if (settings.hapticFeedback) hapticLight().catch(() => {});
+          router.push(`/resource/${item.id}`);
+        }}
       />
     ),
-    [router],
+    [router, settings.hapticFeedback],
   );
 
   const lastCheckTime = lastFullCheck
     ? new Date(lastFullCheck).toLocaleTimeString()
-    : 'Never';
+    : "Never";
+
+  const networkLabel =
+    networkState.isConnected === false ? "Offline" : `Last: ${lastCheckTime}`;
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
       <Appbar.Header elevated>
-        <Appbar.Content title="NetProbe" subtitle={`Last check: ${lastCheckTime}`} />
+        <Appbar.Content title="NetProbe" subtitle={networkLabel} />
         <Appbar.Action
           icon="refresh"
           onPress={checkAllResources}
           disabled={isChecking}
         />
-        <Appbar.Action
-          icon="cog"
-          onPress={() => router.push('/settings')}
-        />
+        <Appbar.Action icon="cog" onPress={() => router.push("/settings")} />
       </Appbar.Header>
 
       <Searchbar
@@ -101,10 +109,13 @@ export default function DashboardScreen() {
         }
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Text variant="bodyLarge" style={{ color: theme.colors.onSurfaceVariant }}>
+            <Text
+              variant="bodyLarge"
+              style={{ color: theme.colors.onSurfaceVariant }}
+            >
               {searchQuery
-                ? 'No resources match your search'
-                : 'No resources configured'}
+                ? "No resources match your search"
+                : "No resources configured"}
             </Text>
           </View>
         }
@@ -114,7 +125,7 @@ export default function DashboardScreen() {
         icon="plus"
         label="Add Resource"
         extended={isExtended}
-        onPress={() => router.push('/add-resource')}
+        onPress={() => router.push("/add-resource")}
         style={[styles.fab, { backgroundColor: theme.colors.primaryContainer }]}
         color={theme.colors.onPrimaryContainer}
       />

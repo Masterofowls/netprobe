@@ -31,7 +31,17 @@ export interface Resource {
 export interface AppSettings {
   refreshInterval: number;
   autoRefresh: boolean;
-  theme: 'light' | 'dark' | 'system';
+  theme: "light" | "dark" | "system";
   timeout: number;
   maxHistoryItems: number;
+  notificationsEnabled: boolean;
+  backgroundCheckEnabled: boolean;
+  hapticFeedback: boolean;
+}
+
+export interface NetworkState {
+  isConnected: boolean | null;
+  type: string | null;
+  isInternetReachable: boolean | null;
+  details: Record<string, unknown> | null;
 }

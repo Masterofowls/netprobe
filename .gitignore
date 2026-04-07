@@ -44,6 +44,9 @@ yarn-error.*
 *.apk
 *.keystore
 
+# Build logs
+*.log
+
 # Memory bank
 memory-bank/
 .copilot/

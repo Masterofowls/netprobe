@@ -116,7 +116,10 @@ export const DEFAULT_RESOURCES: Resource[] = [
 export const DEFAULT_SETTINGS = {
   refreshInterval: 30000,
   autoRefresh: true,
-  theme: 'system' as const,
+  theme: "system" as const,
   timeout: 10000,
   maxHistoryItems: 50,
+  notificationsEnabled: true,
+  backgroundCheckEnabled: false,
+  hapticFeedback: true,
 };

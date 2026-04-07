@@ -118,7 +118,7 @@ export default function SettingsScreen() {
             value={settings.theme}
             onValueChange={(value) =>
               updateSettings({
-                theme: value as 'light' | 'dark' | 'system',
+                theme: value as "light" | "dark" | "system",
               })
             }
           >
@@ -126,6 +126,56 @@ export default function SettingsScreen() {
             <RadioButton.Item label="Light" value="light" />
             <RadioButton.Item label="Dark" value="dark" />
           </RadioButton.Group>
+        </Card.Content>
+      </Card>
+
+      {/* System Integration */}
+      <Card style={styles.card} mode="elevated">
+        <Card.Content>
+          <Text variant="titleMedium" style={styles.sectionTitle}>
+            System Integration
+          </Text>
+          <List.Item
+            title="Notifications"
+            description="Alert when services go offline or recover"
+            left={(props) => <List.Icon {...props} icon="bell-outline" />}
+            right={() => (
+              <Switch
+                value={settings.notificationsEnabled}
+                onValueChange={(value) =>
+                  updateSettings({ notificationsEnabled: value })
+                }
+              />
+            )}
+          />
+          <Divider style={styles.divider} />
+          <List.Item
+            title="Background Monitoring"
+            description="Check services periodically when app is closed"
+            left={(props) => <List.Icon {...props} icon="sync" />}
+            right={() => (
+              <Switch
+                value={settings.backgroundCheckEnabled}
+                onValueChange={(value) =>
+                  updateSettings({ backgroundCheckEnabled: value })
+                }
+              />
+            )}
+          />
+          <Divider style={styles.divider} />
+          <List.Item
+            title="Haptic Feedback"
+            description="Vibrate on status changes"
+            left={(props) => <List.Icon {...props} icon="vibrate" />}
+            right={() => (
+              <Switch
+                value={settings.hapticFeedback}
+                onValueChange={(value) =>
+                  updateSettings({ hapticFeedback: value })
+                }
+              />
+            )}
+          />
         </Card.Content>
       </Card>
 
@@ -137,23 +187,17 @@ export default function SettingsScreen() {
           </Text>
           <List.Item
             title="Built-in Resources"
-            right={() => (
-              <Text variant="bodyLarge">{builtInCount}</Text>
-            )}
+            right={() => <Text variant="bodyLarge">{builtInCount}</Text>}
           />
           <Divider />
           <List.Item
             title="Custom Resources"
-            right={() => (
-              <Text variant="bodyLarge">{customCount}</Text>
-            )}
+            right={() => <Text variant="bodyLarge">{customCount}</Text>}
           />
           <Divider />
           <List.Item
             title="Total Resources"
-            right={() => (
-              <Text variant="bodyLarge">{resources.length}</Text>
-            )}
+            right={() => <Text variant="bodyLarge">{resources.length}</Text>}
           />
         </Card.Content>
       </Card>
@@ -171,7 +215,7 @@ export default function SettingsScreen() {
         </Button>
         <Text
           variant="bodySmall"
-          style={{ color: theme.colors.onSurfaceVariant, textAlign: 'center' }}
+          style={{ color: theme.colors.onSurfaceVariant, textAlign: "center" }}
         >
           This will remove all custom resources and restore default settings
         </Text>
@@ -181,9 +225,9 @@ export default function SettingsScreen() {
       <View style={styles.footer}>
         <Text
           variant="labelSmall"
-          style={{ color: theme.colors.onSurfaceVariant, textAlign: 'center' }}
+          style={{ color: theme.colors.onSurfaceVariant, textAlign: "center" }}
         >
-          NetProbe v1.0.0{'\n'}
+          NetProbe v1.2.0{"\n"}
           Real-time Network Connectivity Tester
         </Text>
       </View>

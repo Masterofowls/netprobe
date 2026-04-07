@@ -2,11 +2,23 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { DEFAULT_RESOURCES, DEFAULT_SETTINGS } from '../constants/resources';
 import { checkResource } from '../services/networkChecker';
-import type { AppSettings, CheckResult, Resource } from '../types';
+import {
+  isOfflineStatus,
+  notifyResourceDown,
+  notifyResourceRecovered,
+} from "../services/notificationService";
+import { hapticForStatus } from "../services/haptics";
+import { updateWidgetData } from "../services/widgetBridge";
+import type {
+  AppSettings,
+  CheckResult,
+  NetworkState,
+  Resource,
+} from "../types";
 
 const STORAGE_KEYS = {
-  RESOURCES: '@netprobe_resources',
-  SETTINGS: '@netprobe_settings',
+  RESOURCES: "@netprobe_resources",
+  SETTINGS: "@netprobe_settings",
 };
 
 interface AppState {
@@ -14,15 +26,19 @@ interface AppState {
   settings: AppSettings;
   isChecking: boolean;
   lastFullCheck: number | null;
+  networkState: NetworkState;
 
   loadData: () => Promise<void>;
-  addResource: (resource: Omit<Resource, 'id' | 'isBuiltIn' | 'history'>) => Promise<void>;
+  addResource: (
+    resource: Omit<Resource, "id" | "isBuiltIn" | "history">,
+  ) => Promise<void>;
   updateResource: (id: string, updates: Partial<Resource>) => Promise<void>;
   deleteResource: (id: string) => Promise<void>;
   checkSingleResource: (id: string) => Promise<void>;
   checkAllResources: () => Promise<void>;
   updateSettings: (updates: Partial<AppSettings>) => Promise<void>;
   resetToDefaults: () => Promise<void>;
+  setNetworkState: (state: NetworkState) => void;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -30,6 +46,12 @@ export const useAppStore = create<AppState>((set, get) => ({
   settings: DEFAULT_SETTINGS,
   isChecking: false,
   lastFullCheck: null,
+  networkState: {
+    isConnected: null,
+    type: null,
+    isInternetReachable: null,
+    details: null,
+  },
 
   loadData: async () => {
     try {
@@ -54,7 +76,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         `[NetProbe] Loaded ${customResources.length} custom resources`,
       );
     } catch {
-      console.warn('[NetProbe] Failed to load data, using defaults');
+      console.warn("[NetProbe] Failed to load data, using defaults");
       // Use defaults on error
     }
   },
@@ -114,10 +136,15 @@ export const useAppStore = create<AppState>((set, get) => ({
     const resource = resources.find((r) => r.id === id);
     if (!resource) return;
 
+    const previousStatus = resource.lastCheck?.status;
+
     set({
       resources: resources.map((r) =>
         r.id === id
-          ? { ...r, lastCheck: { ...r.lastCheck, status: 'checking' } as CheckResult }
+          ? {
+              ...r,
+              lastCheck: { ...r.lastCheck, status: "checking" } as CheckResult,
+            }
           : r,
       ),
     });
@@ -128,20 +155,35 @@ export const useAppStore = create<AppState>((set, get) => ({
       resource.id,
     );
 
+    const updatedResource = {
+      ...resource,
+      lastCheck: result,
+      history: [result, ...resource.history].slice(0, settings.maxHistoryItems),
+    };
+
     set({
       resources: get().resources.map((r) =>
-        r.id === id
-          ? {
-              ...r,
-              lastCheck: result,
-              history: [result, ...r.history].slice(
-                0,
-                settings.maxHistoryItems,
-              ),
-            }
-          : r,
+        r.id === id ? updatedResource : r,
       ),
     });
+
+    // Haptic feedback
+    if (settings.hapticFeedback) {
+      hapticForStatus(result.status).catch(() => {});
+    }
+
+    // Notifications for status changes
+    if (settings.notificationsEnabled && previousStatus) {
+      const wasOnline = previousStatus === "online";
+      const isNowOffline = isOfflineStatus(result.status);
+      const isNowOnline = result.status === "online";
+
+      if (wasOnline && isNowOffline) {
+        notifyResourceDown(updatedResource).catch(() => {});
+      } else if (!wasOnline && isNowOnline && isOfflineStatus(previousStatus)) {
+        notifyResourceRecovered(updatedResource).catch(() => {});
+      }
+    }
   },
 
   checkAllResources: async () => {
@@ -154,7 +196,12 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({
       resources: resources.map((r) => ({
         ...r,
-        lastCheck: { status: 'checking', latency: null, statusCode: null, timestamp: Date.now() },
+        lastCheck: {
+          status: "checking",
+          latency: null,
+          statusCode: null,
+          timestamp: Date.now(),
+        },
       })),
     });
 
@@ -181,6 +228,32 @@ export const useAppStore = create<AppState>((set, get) => ({
     });
 
     await Promise.allSettled(checks);
+
+    const finalResources = get().resources;
+    const online = finalResources.filter(
+      (r) => r.lastCheck?.status === "online",
+    ).length;
+    const offline = finalResources.filter((r) =>
+      r.lastCheck ? isOfflineStatus(r.lastCheck.status) : false,
+    ).length;
+
+    // Update widget with latest data
+    updateWidgetData(
+      online,
+      offline,
+      finalResources.length,
+      finalResources,
+    ).catch(() => {});
+
+    // Haptic feedback for overall result
+    if (settings.hapticFeedback) {
+      if (offline > 0) {
+        hapticForStatus("error").catch(() => {});
+      } else {
+        hapticForStatus("online").catch(() => {});
+      }
+    }
+
     set({ isChecking: false, lastFullCheck: Date.now() });
   },
 
@@ -202,4 +275,6 @@ export const useAppStore = create<AppState>((set, get) => ({
       settings: DEFAULT_SETTINGS,
     });
   },
+
+  setNetworkState: (state) => set({ networkState: state }),
 }));
