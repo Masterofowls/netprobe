@@ -100,6 +100,12 @@ export default function RootLayout() {
               title: "Settings",
             }}
           />
+          <Stack.Screen
+            name="catalog"
+            options={{
+              title: "Resource Catalog",
+            }}
+          />
         </Stack>
       </PaperProvider>
     </SafeAreaProvider>

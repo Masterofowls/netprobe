@@ -10,29 +10,33 @@ import {
   Text,
   useTheme,
 } from 'react-native-paper';
-import { useAppStore } from '../src/store/useAppStore';
+import { useRouter } from "expo-router";
+import { useAppStore } from "../src/store/useAppStore";
+import { RESOURCE_CATALOG } from "../src/constants/catalog";
 
 const INTERVAL_OPTIONS = [
-  { label: '15 seconds', value: 15000 },
-  { label: '30 seconds', value: 30000 },
-  { label: '1 minute', value: 60000 },
-  { label: '5 minutes', value: 300000 },
+  { label: "15 seconds", value: 15000 },
+  { label: "30 seconds", value: 30000 },
+  { label: "1 minute", value: 60000 },
+  { label: "5 minutes", value: 300000 },
 ];
 
 const TIMEOUT_OPTIONS = [
-  { label: '5 seconds', value: 5000 },
-  { label: '10 seconds', value: 10000 },
-  { label: '15 seconds', value: 15000 },
-  { label: '30 seconds', value: 30000 },
+  { label: "5 seconds", value: 5000 },
+  { label: "10 seconds", value: 10000 },
+  { label: "15 seconds", value: 15000 },
+  { label: "30 seconds", value: 30000 },
 ];
 
 export default function SettingsScreen() {
   const theme = useTheme();
+  const router = useRouter();
   const { settings, updateSettings, resetToDefaults, resources } =
     useAppStore();
 
   const customCount = resources.filter((r) => !r.isBuiltIn).length;
   const builtInCount = resources.filter((r) => r.isBuiltIn).length;
+  const catalogTotal = RESOURCE_CATALOG.length;
 
   return (
     <ScrollView
@@ -129,6 +133,38 @@ export default function SettingsScreen() {
         </Card.Content>
       </Card>
 
+      {/* Resource Catalog */}
+      <Card style={styles.card} mode="elevated">
+        <Card.Content>
+          <Text variant="titleMedium" style={styles.sectionTitle}>
+            Resource Catalog
+          </Text>
+          <List.Item
+            title="Hide Built-in Resources"
+            description="Only show custom resources on dashboard"
+            left={(props) => <List.Icon {...props} icon="eye-off-outline" />}
+            right={() => (
+              <Switch
+                value={settings.hideBuiltIn}
+                onValueChange={(value) =>
+                  updateSettings({ hideBuiltIn: value })
+                }
+              />
+            )}
+          />
+          <Divider style={styles.divider} />
+          <List.Item
+            title="Browse Catalog"
+            description={`${builtInCount} of ${catalogTotal} services enabled`}
+            left={(props) => (
+              <List.Icon {...props} icon="view-grid-plus-outline" />
+            )}
+            right={(props) => <List.Icon {...props} icon="chevron-right" />}
+            onPress={() => router.push("/catalog")}
+          />
+        </Card.Content>
+      </Card>
+
       {/* System Integration */}
       <Card style={styles.card} mode="elevated">
         <Card.Content>
@@ -186,18 +222,25 @@ export default function SettingsScreen() {
             Statistics
           </Text>
           <List.Item
-            title="Built-in Resources"
+            title="Catalog Resources"
+            description="From the built-in catalog"
             right={() => <Text variant="bodyLarge">{builtInCount}</Text>}
           />
           <Divider />
           <List.Item
             title="Custom Resources"
+            description="Manually added"
             right={() => <Text variant="bodyLarge">{customCount}</Text>}
           />
           <Divider />
           <List.Item
-            title="Total Resources"
+            title="Total Active"
             right={() => <Text variant="bodyLarge">{resources.length}</Text>}
+          />
+          <Divider />
+          <List.Item
+            title="Available in Catalog"
+            right={() => <Text variant="bodyLarge">{catalogTotal}</Text>}
           />
         </Card.Content>
       </Card>
@@ -227,7 +270,7 @@ export default function SettingsScreen() {
           variant="labelSmall"
           style={{ color: theme.colors.onSurfaceVariant, textAlign: "center" }}
         >
-          NetProbe v1.2.0{"\n"}
+          NetProbe v1.3.0{"\n"}
           Real-time Network Connectivity Tester
         </Text>
       </View>

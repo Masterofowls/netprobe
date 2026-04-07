@@ -26,6 +26,7 @@ export default function DashboardScreen() {
     lastFullCheck,
     networkState,
     settings,
+    getVisibleResources,
   } = useAppStore();
 
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -37,7 +38,9 @@ export default function DashboardScreen() {
     checkAllResources();
   }, [checkAllResources]);
 
-  const filteredResources = resources.filter(
+  const visibleResources = getVisibleResources();
+
+  const filteredResources = visibleResources.filter(
     (r) =>
       r.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       r.category?.toLowerCase().includes(searchQuery.toLowerCase()),
@@ -92,7 +95,7 @@ export default function DashboardScreen() {
         elevation={0}
       />
 
-      <StatusSummary resources={resources} />
+      <StatusSummary resources={visibleResources} />
 
       <FlatList
         data={filteredResources}

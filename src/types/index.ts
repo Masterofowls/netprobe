@@ -28,6 +28,15 @@ export interface Resource {
   history: CheckResult[];
 }
 
+export interface CatalogEntry {
+  id: string;
+  name: string;
+  url: string;
+  icon: string;
+  color: string;
+  category: string;
+}
+
 export interface AppSettings {
   refreshInterval: number;
   autoRefresh: boolean;
@@ -37,6 +46,8 @@ export interface AppSettings {
   notificationsEnabled: boolean;
   backgroundCheckEnabled: boolean;
   hapticFeedback: boolean;
+  hideBuiltIn: boolean;
+  enabledCatalogIds: string[];
 }
 
 export interface NetworkState {

@@ -1,7 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
-import { DEFAULT_RESOURCES, DEFAULT_SETTINGS } from '../constants/resources';
-import { checkResource } from '../services/networkChecker';
+import { RESOURCE_CATALOG } from "../constants/catalog";
+import {
+  catalogToResource,
+  DEFAULT_RESOURCES,
+  DEFAULT_SETTINGS,
+} from "../constants/resources";
+import { checkResource } from "../services/networkChecker";
 import {
   isOfflineStatus,
   notifyResourceDown,
@@ -21,6 +26,11 @@ const STORAGE_KEYS = {
   SETTINGS: "@netprobe_settings",
 };
 
+const buildBuiltInResources = (enabledIds: string[]): Resource[] =>
+  RESOURCE_CATALOG.filter((e) => enabledIds.includes(e.id)).map(
+    catalogToResource,
+  );
+
 interface AppState {
   resources: Resource[];
   settings: AppSettings;
@@ -39,6 +49,9 @@ interface AppState {
   updateSettings: (updates: Partial<AppSettings>) => Promise<void>;
   resetToDefaults: () => Promise<void>;
   setNetworkState: (state: NetworkState) => void;
+  toggleCatalogResource: (id: string) => Promise<void>;
+  setCatalogResources: (ids: string[]) => Promise<void>;
+  getVisibleResources: () => Resource[];
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -68,16 +81,18 @@ export const useAppStore = create<AppState>((set, get) => ({
         ? JSON.parse(settingsJson)
         : {};
 
+      const mergedSettings = { ...DEFAULT_SETTINGS, ...savedSettings };
+      const builtIn = buildBuiltInResources(mergedSettings.enabledCatalogIds);
+
       set({
-        resources: [...DEFAULT_RESOURCES, ...customResources],
-        settings: { ...DEFAULT_SETTINGS, ...savedSettings },
+        resources: [...builtIn, ...customResources],
+        settings: mergedSettings,
       });
       console.log(
-        `[NetProbe] Loaded ${customResources.length} custom resources`,
+        `[NetProbe] Loaded ${builtIn.length} catalog + ${customResources.length} custom resources`,
       );
     } catch {
       console.warn("[NetProbe] Failed to load data, using defaults");
-      // Use defaults on error
     }
   },
 
@@ -277,4 +292,51 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   setNetworkState: (state) => set({ networkState: state }),
+
+  toggleCatalogResource: async (id) => {
+    const { settings, resources } = get();
+    const isEnabled = settings.enabledCatalogIds.includes(id);
+    const newIds = isEnabled
+      ? settings.enabledCatalogIds.filter((i) => i !== id)
+      : [...settings.enabledCatalogIds, id];
+
+    const newSettings = { ...settings, enabledCatalogIds: newIds };
+    await AsyncStorage.setItem(
+      STORAGE_KEYS.SETTINGS,
+      JSON.stringify(newSettings),
+    );
+
+    const customResources = resources.filter((r) => !r.isBuiltIn);
+    const builtIn = buildBuiltInResources(newIds);
+
+    set({
+      settings: newSettings,
+      resources: [...builtIn, ...customResources],
+    });
+  },
+
+  setCatalogResources: async (ids) => {
+    const { settings, resources } = get();
+    const newSettings = { ...settings, enabledCatalogIds: ids };
+    await AsyncStorage.setItem(
+      STORAGE_KEYS.SETTINGS,
+      JSON.stringify(newSettings),
+    );
+
+    const customResources = resources.filter((r) => !r.isBuiltIn);
+    const builtIn = buildBuiltInResources(ids);
+
+    set({
+      settings: newSettings,
+      resources: [...builtIn, ...customResources],
+    });
+  },
+
+  getVisibleResources: () => {
+    const { resources, settings } = get();
+    if (settings.hideBuiltIn) {
+      return resources.filter((r) => !r.isBuiltIn);
+    }
+    return resources;
+  },
 }));
