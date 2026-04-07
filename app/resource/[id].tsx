@@ -1,0 +1,265 @@
+import React, { useCallback, useEffect } from 'react';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import {
+  Button,
+  Card,
+  Chip,
+  Divider,
+  Icon,
+  List,
+  Text,
+  useTheme,
+} from 'react-native-paper';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { LatencyChart } from '../../src/components/LatencyChart';
+import { StatusBadge } from '../../src/components/StatusBadge';
+import { useAppStore } from '../../src/store/useAppStore';
+
+export default function ResourceDetailScreen() {
+  const theme = useTheme();
+  const router = useRouter();
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const { resources, checkSingleResource, deleteResource } = useAppStore();
+
+  const resource = resources.find((r) => r.id === id);
+
+  useEffect(() => {
+    if (id) {
+      checkSingleResource(id);
+    }
+  }, [id, checkSingleResource]);
+
+  const handleDelete = useCallback(async () => {
+    if (resource && !resource.isBuiltIn) {
+      await deleteResource(resource.id);
+      router.back();
+    }
+  }, [resource, deleteResource, router]);
+
+  if (!resource) {
+    return (
+      <View style={[styles.center, { backgroundColor: theme.colors.background }]}>
+        <Text variant="headlineSmall">Resource not found</Text>
+        <Button mode="contained" onPress={() => router.back()} style={{ marginTop: 16 }}>
+          Go Back
+        </Button>
+      </View>
+    );
+  }
+
+  const lastCheck = resource.lastCheck;
+  const status = lastCheck?.status ?? 'unknown';
+
+  return (
+    <ScrollView
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+      contentContainerStyle={styles.content}
+    >
+      {/* Header Card */}
+      <Card style={styles.headerCard} mode="elevated">
+        <Card.Content style={styles.headerContent}>
+          <View
+            style={[
+              styles.iconLarge,
+              { backgroundColor: `${resource.color}20` },
+            ]}
+          >
+            <Icon source={resource.icon} size={40} color={resource.color} />
+          </View>
+          <View style={styles.headerInfo}>
+            <Text variant="headlineSmall" style={{ fontWeight: '700' }}>
+              {resource.name}
+            </Text>
+            <Text
+              variant="bodyMedium"
+              style={{ color: theme.colors.onSurfaceVariant }}
+            >
+              {resource.url}
+            </Text>
+            <View style={styles.chips}>
+              {resource.category && (
+                <Chip compact style={styles.chip}>
+                  {resource.category}
+                </Chip>
+              )}
+              <Chip compact style={styles.chip}>
+                {resource.isBuiltIn ? 'Built-in' : 'Custom'}
+              </Chip>
+            </View>
+          </View>
+        </Card.Content>
+      </Card>
+
+      {/* Status Card */}
+      <Card style={styles.card} mode="elevated">
+        <Card.Content>
+          <Text variant="titleMedium" style={styles.sectionTitle}>
+            Current Status
+          </Text>
+          <View style={styles.statusRow}>
+            <StatusBadge status={status} size="medium" />
+            {lastCheck?.latency !== null && lastCheck?.latency !== undefined && (
+              <Text variant="headlineMedium" style={{ fontWeight: '700' }}>
+                {lastCheck.latency}ms
+              </Text>
+            )}
+          </View>
+          {lastCheck?.statusCode && (
+            <Text
+              variant="bodyMedium"
+              style={{ color: theme.colors.onSurfaceVariant, marginTop: 8 }}
+            >
+              HTTP Status: {lastCheck.statusCode}
+            </Text>
+          )}
+          {lastCheck?.errorMessage && (
+            <Text
+              variant="bodyMedium"
+              style={{ color: theme.colors.error, marginTop: 8 }}
+            >
+              {lastCheck.errorMessage}
+            </Text>
+          )}
+          {lastCheck?.timestamp && (
+            <Text
+              variant="labelSmall"
+              style={{ color: theme.colors.onSurfaceVariant, marginTop: 8 }}
+            >
+              Checked: {new Date(lastCheck.timestamp).toLocaleString()}
+            </Text>
+          )}
+        </Card.Content>
+      </Card>
+
+      {/* Latency Chart */}
+      <Card style={styles.card} mode="elevated">
+        <Card.Content>
+          <Text variant="titleMedium" style={styles.sectionTitle}>
+            Latency History
+          </Text>
+          <LatencyChart history={resource.history} />
+        </Card.Content>
+      </Card>
+
+      {/* History Log */}
+      <Card style={styles.card} mode="elevated">
+        <Card.Content>
+          <Text variant="titleMedium" style={styles.sectionTitle}>
+            Check History
+          </Text>
+          {resource.history.length === 0 ? (
+            <Text
+              variant="bodyMedium"
+              style={{ color: theme.colors.onSurfaceVariant }}
+            >
+              No history yet
+            </Text>
+          ) : (
+            resource.history.slice(0, 10).map((entry, index) => (
+              <React.Fragment key={`${entry.timestamp}-${index}`}>
+                <List.Item
+                  title={entry.status.toUpperCase()}
+                  description={`${entry.latency ?? '-'}ms • HTTP ${entry.statusCode ?? '-'}`}
+                  right={() => (
+                    <Text variant="labelSmall" style={{ alignSelf: 'center' }}>
+                      {new Date(entry.timestamp).toLocaleTimeString()}
+                    </Text>
+                  )}
+                  left={() => <StatusBadge status={entry.status} />}
+                />
+                {index < Math.min(resource.history.length, 10) - 1 && (
+                  <Divider />
+                )}
+              </React.Fragment>
+            ))
+          )}
+        </Card.Content>
+      </Card>
+
+      {/* Actions */}
+      <View style={styles.actions}>
+        <Button
+          mode="contained"
+          onPress={() => checkSingleResource(resource.id)}
+          icon="refresh"
+          style={styles.actionButton}
+        >
+          Recheck Now
+        </Button>
+        {!resource.isBuiltIn && (
+          <Button
+            mode="outlined"
+            onPress={handleDelete}
+            icon="delete"
+            textColor={theme.colors.error}
+            style={styles.actionButton}
+          >
+            Delete Resource
+          </Button>
+        )}
+      </View>
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  content: {
+    paddingBottom: 32,
+  },
+  center: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerCard: {
+    margin: 16,
+    borderRadius: 20,
+  },
+  headerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  headerInfo: {
+    flex: 1,
+  },
+  iconLarge: {
+    width: 72,
+    height: 72,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  chips: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 8,
+  },
+  chip: {
+    height: 28,
+  },
+  card: {
+    marginHorizontal: 16,
+    marginBottom: 12,
+    borderRadius: 16,
+  },
+  sectionTitle: {
+    fontWeight: '600',
+    marginBottom: 12,
+  },
+  statusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  actions: {
+    padding: 16,
+    gap: 12,
+  },
+  actionButton: {
+    borderRadius: 12,
+  },
+});
