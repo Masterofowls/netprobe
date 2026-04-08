@@ -10,6 +10,7 @@ import { useAppStore } from '../src/store/useAppStore';
 import { useNetworkMonitor } from "../src/hooks/useNetworkMonitor";
 import { NetworkBanner } from "../src/components/NetworkBanner";
 import { setupNotifications } from "../src/services/notificationService";
+import { useT } from "../src/hooks/useTranslation";
 import {
   registerBackgroundTask,
   unregisterBackgroundTask,
@@ -22,6 +23,7 @@ export default function RootLayout() {
   const { settings, loadData } = useAppStore();
   const [ready, setReady] = useState(false);
   const networkState = useNetworkMonitor();
+  const t = useT();
 
   const resolvedTheme =
     settings.theme === "system" ? colorScheme : settings.theme;
@@ -77,33 +79,33 @@ export default function RootLayout() {
           <Stack.Screen
             name="index"
             options={{
-              title: "NetProbe",
-              headerLargeTitle: true,
+              title: t.appName,
+              headerShown: false,
             }}
           />
           <Stack.Screen
             name="resource/[id]"
             options={{
-              title: "Resource Details",
+              title: t.resourceDetails,
             }}
           />
           <Stack.Screen
             name="add-resource"
             options={{
-              title: "Add Resource",
+              title: t.addResource,
               presentation: "modal",
             }}
           />
           <Stack.Screen
             name="settings"
             options={{
-              title: "Settings",
+              title: t.settings,
             }}
           />
           <Stack.Screen
             name="catalog"
             options={{
-              title: "Resource Catalog",
+              title: t.catalog,
             }}
           />
         </Stack>

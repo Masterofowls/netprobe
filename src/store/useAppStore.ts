@@ -19,6 +19,7 @@ import type {
   CheckResult,
   NetworkState,
   Resource,
+  SortMode,
 } from "../types";
 
 const STORAGE_KEYS = {
@@ -51,6 +52,7 @@ interface AppState {
   setNetworkState: (state: NetworkState) => void;
   toggleCatalogResource: (id: string) => Promise<void>;
   setCatalogResources: (ids: string[]) => Promise<void>;
+  togglePin: (id: string) => Promise<void>;
   getVisibleResources: () => Resource[];
 }
 
@@ -332,11 +334,52 @@ export const useAppStore = create<AppState>((set, get) => ({
     });
   },
 
+  togglePin: async (id) => {
+    const { settings } = get();
+    const isPinned = settings.pinnedIds.includes(id);
+    const newPins = isPinned
+      ? settings.pinnedIds.filter((i) => i !== id)
+      : [...settings.pinnedIds, id];
+
+    const newSettings = { ...settings, pinnedIds: newPins };
+    await AsyncStorage.setItem(
+      STORAGE_KEYS.SETTINGS,
+      JSON.stringify(newSettings),
+    );
+    set({ settings: newSettings });
+  },
+
   getVisibleResources: () => {
     const { resources, settings } = get();
-    if (settings.hideBuiltIn) {
-      return resources.filter((r) => !r.isBuiltIn);
+    let list = settings.hideBuiltIn
+      ? resources.filter((r) => !r.isBuiltIn)
+      : resources;
+
+    // Sort
+    const statusOrder: Record<string, number> = {
+      online: 0,
+      checking: 1,
+      unknown: 2,
+      timeout: 3,
+      blocked: 4,
+      dns_failure: 5,
+      error: 6,
+      offline: 7,
+    };
+
+    if (settings.sortMode === "status") {
+      list = [...list].sort((a, b) => {
+        const sa = statusOrder[a.lastCheck?.status ?? "unknown"] ?? 2;
+        const sb = statusOrder[b.lastCheck?.status ?? "unknown"] ?? 2;
+        return sa - sb;
+      });
+    } else if (settings.sortMode === "name") {
+      list = [...list].sort((a, b) => a.name.localeCompare(b.name));
     }
-    return resources;
+
+    // Pinned always on top
+    const pinned = list.filter((r) => settings.pinnedIds.includes(r.id));
+    const unpinned = list.filter((r) => !settings.pinnedIds.includes(r.id));
+    return [...pinned, ...unpinned];
   },
 }));

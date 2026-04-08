@@ -11,15 +11,19 @@ import {
   useTheme,
 } from 'react-native-paper';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { LatencyChart } from '../../src/components/LatencyChart';
-import { StatusBadge } from '../../src/components/StatusBadge';
-import { useAppStore } from '../../src/store/useAppStore';
+import * as Linking from "expo-linking";
+import { LatencyChart } from "../../src/components/LatencyChart";
+import { StatusBadge } from "../../src/components/StatusBadge";
+import { useAppStore } from "../../src/store/useAppStore";
+import { useT } from "../../src/hooks/useTranslation";
+import { countryCodeToFlag } from "../../src/services/geoLookup";
 
 export default function ResourceDetailScreen() {
   const theme = useTheme();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { resources, checkSingleResource, deleteResource } = useAppStore();
+  const t = useT();
 
   const resource = resources.find((r) => r.id === id);
 
@@ -38,17 +42,23 @@ export default function ResourceDetailScreen() {
 
   if (!resource) {
     return (
-      <View style={[styles.center, { backgroundColor: theme.colors.background }]}>
+      <View
+        style={[styles.center, { backgroundColor: theme.colors.background }]}
+      >
         <Text variant="headlineSmall">Resource not found</Text>
-        <Button mode="contained" onPress={() => router.back()} style={{ marginTop: 16 }}>
-          Go Back
+        <Button
+          mode="contained"
+          onPress={() => router.back()}
+          style={{ marginTop: 16 }}
+        >
+          {t.goBack}
         </Button>
       </View>
     );
   }
 
   const lastCheck = resource.lastCheck;
-  const status = lastCheck?.status ?? 'unknown';
+  const status = lastCheck?.status ?? "unknown";
 
   return (
     <ScrollView
@@ -67,7 +77,7 @@ export default function ResourceDetailScreen() {
             <Icon source={resource.icon} size={40} color={resource.color} />
           </View>
           <View style={styles.headerInfo}>
-            <Text variant="headlineSmall" style={{ fontWeight: '700' }}>
+            <Text variant="headlineSmall" style={{ fontWeight: "700" }}>
               {resource.name}
             </Text>
             <Text
@@ -83,7 +93,7 @@ export default function ResourceDetailScreen() {
                 </Chip>
               )}
               <Chip compact style={styles.chip}>
-                {resource.isBuiltIn ? 'Built-in' : 'Custom'}
+                {resource.isBuiltIn ? t.builtIn : t.custom}
               </Chip>
             </View>
           </View>
@@ -94,22 +104,23 @@ export default function ResourceDetailScreen() {
       <Card style={styles.card} mode="elevated">
         <Card.Content>
           <Text variant="titleMedium" style={styles.sectionTitle}>
-            Current Status
+            {t.currentStatus}
           </Text>
           <View style={styles.statusRow}>
             <StatusBadge status={status} size="medium" />
-            {lastCheck?.latency !== null && lastCheck?.latency !== undefined && (
-              <Text variant="headlineMedium" style={{ fontWeight: '700' }}>
-                {lastCheck.latency}ms
-              </Text>
-            )}
+            {lastCheck?.latency !== null &&
+              lastCheck?.latency !== undefined && (
+                <Text variant="headlineMedium" style={{ fontWeight: "700" }}>
+                  {lastCheck.latency}ms
+                </Text>
+              )}
           </View>
           {lastCheck?.statusCode && (
             <Text
               variant="bodyMedium"
               style={{ color: theme.colors.onSurfaceVariant, marginTop: 8 }}
             >
-              HTTP Status: {lastCheck.statusCode}
+              {t.httpStatus}: {lastCheck.statusCode}
             </Text>
           )}
           {lastCheck?.errorMessage && (
@@ -125,8 +136,24 @@ export default function ResourceDetailScreen() {
               variant="labelSmall"
               style={{ color: theme.colors.onSurfaceVariant, marginTop: 8 }}
             >
-              Checked: {new Date(lastCheck.timestamp).toLocaleString()}
+              {t.lastChecked}: {new Date(lastCheck.timestamp).toLocaleString()}
             </Text>
+          )}
+          {lastCheck?.resolvedIp && (
+            <View style={styles.geoRow}>
+              {lastCheck.countryCode && (
+                <Text variant="bodyLarge">
+                  {countryCodeToFlag(lastCheck.countryCode)}
+                </Text>
+              )}
+              <Text
+                variant="bodyMedium"
+                style={{ color: theme.colors.onSurfaceVariant }}
+              >
+                {lastCheck.resolvedIp}
+                {lastCheck.countryCode ? ` (${lastCheck.countryCode})` : ""}
+              </Text>
+            </View>
           )}
         </Card.Content>
       </Card>
@@ -135,7 +162,7 @@ export default function ResourceDetailScreen() {
       <Card style={styles.card} mode="elevated">
         <Card.Content>
           <Text variant="titleMedium" style={styles.sectionTitle}>
-            Latency History
+            {t.responseHistory}
           </Text>
           <LatencyChart history={resource.history} />
         </Card.Content>
@@ -152,16 +179,16 @@ export default function ResourceDetailScreen() {
               variant="bodyMedium"
               style={{ color: theme.colors.onSurfaceVariant }}
             >
-              No history yet
+              {t.noHistory}
             </Text>
           ) : (
             resource.history.slice(0, 10).map((entry, index) => (
               <React.Fragment key={`${entry.timestamp}-${index}`}>
                 <List.Item
                   title={entry.status.toUpperCase()}
-                  description={`${entry.latency ?? '-'}ms • HTTP ${entry.statusCode ?? '-'}`}
+                  description={`${entry.latency ?? "-"}ms • HTTP ${entry.statusCode ?? "-"}`}
                   right={() => (
-                    <Text variant="labelSmall" style={{ alignSelf: 'center' }}>
+                    <Text variant="labelSmall" style={{ alignSelf: "center" }}>
                       {new Date(entry.timestamp).toLocaleTimeString()}
                     </Text>
                   )}
@@ -179,12 +206,20 @@ export default function ResourceDetailScreen() {
       {/* Actions */}
       <View style={styles.actions}>
         <Button
+          mode="contained-tonal"
+          onPress={() => Linking.openURL(resource.url)}
+          icon="open-in-new"
+          style={styles.actionButton}
+        >
+          {t.openInBrowser}
+        </Button>
+        <Button
           mode="contained"
           onPress={() => checkSingleResource(resource.id)}
           icon="refresh"
           style={styles.actionButton}
         >
-          Recheck Now
+          {t.recheck}
         </Button>
         {!resource.isBuiltIn && (
           <Button
@@ -194,7 +229,7 @@ export default function ResourceDetailScreen() {
             textColor={theme.colors.error}
             style={styles.actionButton}
           >
-            Delete Resource
+            {t.deleteResource}
           </Button>
         )}
       </View>
@@ -211,16 +246,16 @@ const styles = StyleSheet.create({
   },
   center: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   headerCard: {
     margin: 16,
     borderRadius: 20,
   },
   headerContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 16,
   },
   headerInfo: {
@@ -230,11 +265,11 @@ const styles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   chips: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 8,
     marginTop: 8,
   },
@@ -247,12 +282,12 @@ const styles = StyleSheet.create({
     borderRadius: 16,
   },
   sectionTitle: {
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 12,
   },
   statusRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 16,
   },
   actions: {
@@ -261,5 +296,11 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     borderRadius: 12,
+  },
+  geoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginTop: 8,
   },
 });

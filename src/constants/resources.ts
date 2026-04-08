@@ -27,4 +27,7 @@ export const DEFAULT_SETTINGS = {
   hapticFeedback: true,
   hideBuiltIn: false,
   enabledCatalogIds: DEFAULT_ENABLED_IDS,
+  language: "en" as const,
+  pinnedIds: [] as string[],
+  sortMode: "default" as const,
 };

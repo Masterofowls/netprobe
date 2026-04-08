@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Text, useTheme } from 'react-native-paper';
 import type { Resource } from '../types';
+import { useT } from "../hooks/useTranslation";
 
 interface StatusSummaryProps {
   resources: Resource[];
@@ -9,12 +10,13 @@ interface StatusSummaryProps {
 
 export const StatusSummary: React.FC<StatusSummaryProps> = ({ resources }) => {
   const theme = useTheme();
+  const t = useT();
 
   const counts = resources.reduce(
     (acc, r) => {
-      const status = r.lastCheck?.status ?? 'unknown';
-      if (status === 'online') acc.online++;
-      else if (status === 'checking' || status === 'unknown') acc.pending++;
+      const status = r.lastCheck?.status ?? "unknown";
+      if (status === "online") acc.online++;
+      else if (status === "checking" || status === "unknown") acc.pending++;
       else acc.issues++;
       return acc;
     },
@@ -24,25 +26,25 @@ export const StatusSummary: React.FC<StatusSummaryProps> = ({ resources }) => {
   return (
     <View style={styles.container}>
       <SummaryItem
-        label="Online"
+        label={t.online}
         count={counts.online}
         color="#4CAF50"
         theme={theme}
       />
       <SummaryItem
-        label="Issues"
+        label={t.issues}
         count={counts.issues}
         color="#F44336"
         theme={theme}
       />
       <SummaryItem
-        label="Pending"
+        label={t.pending}
         count={counts.pending}
         color="#FF9800"
         theme={theme}
       />
       <SummaryItem
-        label="Total"
+        label={t.total}
         count={resources.length}
         color={theme.colors.primary}
         theme={theme}

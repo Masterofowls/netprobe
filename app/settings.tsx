@@ -13,24 +13,26 @@ import {
 import { useRouter } from "expo-router";
 import { useAppStore } from "../src/store/useAppStore";
 import { RESOURCE_CATALOG } from "../src/constants/catalog";
+import { useT } from "../src/hooks/useTranslation";
 
 const INTERVAL_OPTIONS = [
-  { label: "15 seconds", value: 15000 },
-  { label: "30 seconds", value: 30000 },
-  { label: "1 minute", value: 60000 },
-  { label: "5 minutes", value: 300000 },
+  { label: "15s", value: 15000 },
+  { label: "30s", value: 30000 },
+  { label: "1m", value: 60000 },
+  { label: "5m", value: 300000 },
 ];
 
 const TIMEOUT_OPTIONS = [
-  { label: "5 seconds", value: 5000 },
-  { label: "10 seconds", value: 10000 },
-  { label: "15 seconds", value: 15000 },
-  { label: "30 seconds", value: 30000 },
+  { label: "5s", value: 5000 },
+  { label: "10s", value: 10000 },
+  { label: "15s", value: 15000 },
+  { label: "30s", value: 30000 },
 ];
 
 export default function SettingsScreen() {
   const theme = useTheme();
   const router = useRouter();
+  const t = useT();
   const { settings, updateSettings, resetToDefaults, resources } =
     useAppStore();
 
@@ -43,15 +45,33 @@ export default function SettingsScreen() {
       style={[styles.container, { backgroundColor: theme.colors.background }]}
       contentContainerStyle={styles.content}
     >
+      {/* Language */}
+      <Card style={styles.card} mode="elevated">
+        <Card.Content>
+          <Text variant="titleMedium" style={styles.sectionTitle}>
+            {t.language}
+          </Text>
+          <RadioButton.Group
+            value={settings.language}
+            onValueChange={(value) =>
+              updateSettings({ language: value as "en" | "ru" })
+            }
+          >
+            <RadioButton.Item label="English" value="en" />
+            <RadioButton.Item label="Русский" value="ru" />
+          </RadioButton.Group>
+        </Card.Content>
+      </Card>
+
       {/* Auto Refresh */}
       <Card style={styles.card} mode="elevated">
         <Card.Content>
           <Text variant="titleMedium" style={styles.sectionTitle}>
-            Auto Refresh
+            {t.autoRefresh}
           </Text>
           <List.Item
-            title="Enable Auto Refresh"
-            description="Periodically check all resources"
+            title={t.autoRefresh}
+            description={t.autoRefreshDesc}
             right={() => (
               <Switch
                 value={settings.autoRefresh}
@@ -68,7 +88,7 @@ export default function SettingsScreen() {
                 variant="labelLarge"
                 style={{ marginTop: 8, marginBottom: 4 }}
               >
-                Refresh Interval
+                {t.refreshInterval}
               </Text>
               <RadioButton.Group
                 value={String(settings.refreshInterval)}
@@ -93,7 +113,7 @@ export default function SettingsScreen() {
       <Card style={styles.card} mode="elevated">
         <Card.Content>
           <Text variant="titleMedium" style={styles.sectionTitle}>
-            Request Timeout
+            {t.requestTimeout}
           </Text>
           <RadioButton.Group
             value={String(settings.timeout)}
@@ -116,7 +136,7 @@ export default function SettingsScreen() {
       <Card style={styles.card} mode="elevated">
         <Card.Content>
           <Text variant="titleMedium" style={styles.sectionTitle}>
-            Theme
+            {t.theme}
           </Text>
           <RadioButton.Group
             value={settings.theme}
@@ -126,9 +146,9 @@ export default function SettingsScreen() {
               })
             }
           >
-            <RadioButton.Item label="System Default" value="system" />
-            <RadioButton.Item label="Light" value="light" />
-            <RadioButton.Item label="Dark" value="dark" />
+            <RadioButton.Item label={t.systemDefault} value="system" />
+            <RadioButton.Item label={t.light} value="light" />
+            <RadioButton.Item label={t.dark} value="dark" />
           </RadioButton.Group>
         </Card.Content>
       </Card>
@@ -137,11 +157,11 @@ export default function SettingsScreen() {
       <Card style={styles.card} mode="elevated">
         <Card.Content>
           <Text variant="titleMedium" style={styles.sectionTitle}>
-            Resource Catalog
+            {t.resourceCatalog}
           </Text>
           <List.Item
-            title="Hide Built-in Resources"
-            description="Only show custom resources on dashboard"
+            title={t.hideBuiltIn}
+            description={t.hideBuiltInDesc}
             left={(props) => <List.Icon {...props} icon="eye-off-outline" />}
             right={() => (
               <Switch
@@ -154,8 +174,8 @@ export default function SettingsScreen() {
           />
           <Divider style={styles.divider} />
           <List.Item
-            title="Browse Catalog"
-            description={`${builtInCount} of ${catalogTotal} services enabled`}
+            title={t.browseCatalog}
+            description={`${builtInCount} / ${catalogTotal}`}
             left={(props) => (
               <List.Icon {...props} icon="view-grid-plus-outline" />
             )}
@@ -169,11 +189,11 @@ export default function SettingsScreen() {
       <Card style={styles.card} mode="elevated">
         <Card.Content>
           <Text variant="titleMedium" style={styles.sectionTitle}>
-            System Integration
+            {t.systemIntegration}
           </Text>
           <List.Item
-            title="Notifications"
-            description="Alert when services go offline or recover"
+            title={t.notifications}
+            description={t.notificationsDesc}
             left={(props) => <List.Icon {...props} icon="bell-outline" />}
             right={() => (
               <Switch
@@ -186,8 +206,8 @@ export default function SettingsScreen() {
           />
           <Divider style={styles.divider} />
           <List.Item
-            title="Background Monitoring"
-            description="Check services periodically when app is closed"
+            title={t.backgroundMonitoring}
+            description={t.backgroundMonitoringDesc}
             left={(props) => <List.Icon {...props} icon="sync" />}
             right={() => (
               <Switch
@@ -200,8 +220,8 @@ export default function SettingsScreen() {
           />
           <Divider style={styles.divider} />
           <List.Item
-            title="Haptic Feedback"
-            description="Vibrate on status changes"
+            title={t.hapticFeedback}
+            description={t.hapticFeedbackDesc}
             left={(props) => <List.Icon {...props} icon="vibrate" />}
             right={() => (
               <Switch
@@ -219,27 +239,27 @@ export default function SettingsScreen() {
       <Card style={styles.card} mode="elevated">
         <Card.Content>
           <Text variant="titleMedium" style={styles.sectionTitle}>
-            Statistics
+            {t.statistics}
           </Text>
           <List.Item
-            title="Catalog Resources"
-            description="From the built-in catalog"
+            title={t.catalogResources}
+            description={t.fromCatalog}
             right={() => <Text variant="bodyLarge">{builtInCount}</Text>}
           />
           <Divider />
           <List.Item
-            title="Custom Resources"
-            description="Manually added"
+            title={t.customResources}
+            description={t.manuallyAdded}
             right={() => <Text variant="bodyLarge">{customCount}</Text>}
           />
           <Divider />
           <List.Item
-            title="Total Active"
+            title={t.totalActive}
             right={() => <Text variant="bodyLarge">{resources.length}</Text>}
           />
           <Divider />
           <List.Item
-            title="Available in Catalog"
+            title={t.availableInCatalog}
             right={() => <Text variant="bodyLarge">{catalogTotal}</Text>}
           />
         </Card.Content>
@@ -254,13 +274,13 @@ export default function SettingsScreen() {
           textColor={theme.colors.error}
           style={styles.resetButton}
         >
-          Reset to Defaults
+          {t.resetToDefaults}
         </Button>
         <Text
           variant="bodySmall"
           style={{ color: theme.colors.onSurfaceVariant, textAlign: "center" }}
         >
-          This will remove all custom resources and restore default settings
+          {t.resetDesc}
         </Text>
       </View>
 
@@ -270,8 +290,8 @@ export default function SettingsScreen() {
           variant="labelSmall"
           style={{ color: theme.colors.onSurfaceVariant, textAlign: "center" }}
         >
-          NetProbe v1.3.0{"\n"}
-          Real-time Network Connectivity Tester
+          NetProbe v1.4.0{"\n"}
+          {t.appTagline}
         </Text>
       </View>
     </ScrollView>

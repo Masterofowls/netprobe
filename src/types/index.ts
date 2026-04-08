@@ -14,6 +14,8 @@ export interface CheckResult {
   statusCode: number | null;
   timestamp: number;
   errorMessage?: string;
+  resolvedIp?: string;
+  countryCode?: string;
 }
 
 export interface Resource {
@@ -37,6 +39,8 @@ export interface CatalogEntry {
   category: string;
 }
 
+export type SortMode = "default" | "status" | "name";
+
 export interface AppSettings {
   refreshInterval: number;
   autoRefresh: boolean;
@@ -48,6 +52,9 @@ export interface AppSettings {
   hapticFeedback: boolean;
   hideBuiltIn: boolean;
   enabledCatalogIds: string[];
+  language: "en" | "ru";
+  pinnedIds: string[];
+  sortMode: SortMode;
 }
 
 export interface NetworkState {

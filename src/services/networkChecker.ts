@@ -1,9 +1,10 @@
 import type { CheckResult, ResourceStatus } from '../types';
+import { lookupGeo } from "./geoLookup";
 
 const CONTROLLER_MAP = new Map<string, AbortController>();
 
 const USER_AGENT =
-  'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Mobile Safari/537.36';
+  "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Mobile Safari/537.36";
 
 const HEAD_RETRY_CODES = new Set([403, 405, 406]);
 
@@ -30,24 +31,24 @@ export const checkResource = async (
 
   try {
     const headers = {
-      'User-Agent': USER_AGENT,
-      'Accept': 'text/html,application/xhtml+xml',
+      "User-Agent": USER_AGENT,
+      Accept: "text/html,application/xhtml+xml",
     };
 
     let response = await fetch(url, {
-      method: 'HEAD',
+      method: "HEAD",
       signal: controller.signal,
       headers,
-      redirect: 'follow',
+      redirect: "follow",
     });
 
     // Retry with GET if the server rejects HEAD
     if (HEAD_RETRY_CODES.has(response.status)) {
       response = await fetch(url, {
-        method: 'GET',
+        method: "GET",
         signal: controller.signal,
         headers,
-        redirect: 'follow',
+        redirect: "follow",
       });
     }
 
@@ -57,19 +58,24 @@ export const checkResource = async (
       `[NetProbe] ${url} -> ${status} (${response.status}) ${latency}ms`,
     );
 
+    // Fire-and-forget geo lookup (non-blocking)
+    const geo = await lookupGeo(url).catch(() => null);
+
     return {
       status,
       latency,
       statusCode: response.status,
       timestamp: Date.now(),
+      resolvedIp: geo?.ip,
+      countryCode: geo?.countryCode,
     };
   } catch (error: unknown) {
     const latency = Date.now() - startTime;
 
-    if (error instanceof Error && error.name === 'AbortError') {
+    if (error instanceof Error && error.name === "AbortError") {
       if (latency >= timeout * 0.9) {
         return {
-          status: 'timeout',
+          status: "timeout",
           latency,
           statusCode: null,
           timestamp: Date.now(),
@@ -77,16 +83,16 @@ export const checkResource = async (
         };
       }
       return {
-        status: 'unknown',
+        status: "unknown",
         latency: null,
         statusCode: null,
         timestamp: Date.now(),
-        errorMessage: 'Request cancelled',
+        errorMessage: "Request cancelled",
       };
     }
 
     const errorMessage =
-      error instanceof Error ? error.message : 'Unknown error';
+      error instanceof Error ? error.message : "Unknown error";
     const status = deriveErrorStatus(errorMessage);
     console.error(`[NetProbe] ${url} -> ERROR: ${status} - ${errorMessage}`);
 

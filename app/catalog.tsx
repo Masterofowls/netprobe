@@ -12,6 +12,7 @@ import {
 } from "react-native-paper";
 import { CATALOG_CATEGORIES, RESOURCE_CATALOG } from "../src/constants/catalog";
 import { useAppStore } from "../src/store/useAppStore";
+import { useT } from "../src/hooks/useTranslation";
 import type { CatalogEntry } from "../src/types";
 
 interface SectionData {
@@ -24,6 +25,7 @@ export default function CatalogScreen() {
   const { settings, toggleCatalogResource, setCatalogResources } =
     useAppStore();
   const [search, setSearch] = useState("");
+  const t = useT();
 
   const enabledSet = useMemo(
     () => new Set(settings.enabledCatalogIds),
@@ -130,7 +132,7 @@ export default function CatalogScreen() {
             onPress={handleToggleSection}
             style={styles.sectionChip}
           >
-            {sectionAllEnabled ? "Deselect" : "Select all"}
+            {sectionAllEnabled ? t.deselectAll : t.selectAll}
           </Chip>
         </View>
       );
@@ -144,7 +146,7 @@ export default function CatalogScreen() {
     >
       <View style={styles.topBar}>
         <Searchbar
-          placeholder="Search catalog..."
+          placeholder={t.searchCatalog}
           value={search}
           onChangeText={setSearch}
           style={styles.searchbar}
@@ -155,7 +157,7 @@ export default function CatalogScreen() {
             variant="labelMedium"
             style={{ color: theme.colors.onSurfaceVariant }}
           >
-            {enabledSet.size} of {RESOURCE_CATALOG.length} selected
+            {enabledSet.size} / {RESOURCE_CATALOG.length} {t.selected}
           </Text>
           <IconButton
             icon={
