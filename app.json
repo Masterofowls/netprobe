@@ -45,7 +45,8 @@
           "icon": "./assets/icon.png",
           "color": "#1a1a2e"
         }
-      ]
+      ],
+      "./plugins/withAdiRegistration"
     ]
   }
 }

@@ -1,0 +1,7 @@
+com.netprobe.app-pngs-0 C:\Users\mrdan\netprobe\app\build\generated\res\pngs\release
+com.netprobe.app-resValues-1 C:\Users\mrdan\netprobe\app\build\generated\res\resValues\release
+com.netprobe.app-packageReleaseResources-2 C:\Users\mrdan\netprobe\app\build\intermediates\incremental\release\packageReleaseResources\merged.dir
+com.netprobe.app-packageReleaseResources-3 C:\Users\mrdan\netprobe\app\build\intermediates\incremental\release\packageReleaseResources\stripped.dir
+com.netprobe.app-release-4 C:\Users\mrdan\netprobe\app\build\intermediates\merged_res\release\mergeReleaseResources
+com.netprobe.app-main-5 C:\Users\mrdan\netprobe\app\src\main\res
+com.netprobe.app-release-6 C:\Users\mrdan\netprobe\app\src\release\res
