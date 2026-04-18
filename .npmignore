@@ -11,4 +11,9 @@ venv*/
 .github/
 memory-bank/
 .copilot/
+app/build/
+build/
+.gradle/
+gradle/
+gradlew.bat
 
