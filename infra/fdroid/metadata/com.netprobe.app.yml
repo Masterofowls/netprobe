@@ -1,0 +1,52 @@
+Categories:
+  - Internet
+  - System
+License: MIT
+AuthorName: Masterofowls
+SourceCode: https://github.com/Masterofowls/netprobe
+IssueTracker: https://github.com/Masterofowls/netprobe/issues
+Changelog: https://github.com/Masterofowls/netprobe/releases
+WebSite: https://netprobe-1.vercel.app
+
+RepoType: git
+Repo: https://github.com/Masterofowls/netprobe.git
+
+Builds:
+  - versionName: '1.5.3'
+    versionCode: 10
+    commit: df40d0ab2de31baf4f1690015b4416220a98151b
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y npm
+    init:
+      - cd ../..
+      - npm install
+    srclibs:
+      - firebase-stub@ce90a956aacda17a85c60577ee443aeb83d876ef
+    prebuild:
+      - cd ../..
+      - sed -i -e '1a "expo":{"autolinking":{"android":{"buildFromSource":[".*"]}}},' package.json
+      - sed -i '/jvmToolchain\|JavaVersion/s/17/21/' node_modules/@react-native/gradle-plugin/*/build.gradle.kts node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/src/main/kotlin/com/facebook/react/utils/JdkConfiguratorUtils.kt
+      - sed -i -e '/installreferrer/d' node_modules/expo-application/android/build.gradle
+      - sed -i -e '/com.android.installreferrer.api/d' -e '/StringBuilder()/,/^ })/d' -e '/getInstallReferrerAsync/apromise.resolve("")' node_modules/expo-application/android/src/main/java/expo/modules/application/ApplicationModule.kt
+      - sed -i -e '/firebase/d' node_modules/expo-notifications/android/build.gradle
+      - cp -a $$firebase-stub$$/firebase-messaging/src node_modules/expo-notifications/android
+      - sed -i -e '/withAdiRegistration/d' app.json
+      - sed -i -e '/com.google.firebase.messaging/d' android/app/src/main/AndroidManifest.xml
+      - rm -f android/app/src/main/assets/adi-registration.properties
+      - sed -i -e '/signingConfig /d' android/app/build.gradle
+    gradle:
+      - assembleRelease
+    scanignore:
+      - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/expo-modules-autolinking/scripts/android/autolinking_implementation.gradle
+    scandelete:
+      - node_modules
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[\d.]+$
+UpdateCheckData: android/app/build.gradle|versionCode\s+(\d+)|.|versionName\s+"([^"]+)"
+CurrentVersion: '1.5.3'
+CurrentVersionCode: 10

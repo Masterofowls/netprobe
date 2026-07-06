@@ -40,6 +40,10 @@ NetProbe is available on [Komi Store](https://komistore.app/) — the open-sourc
 
 Download the latest APK directly from [GitHub Releases](https://github.com/Masterofowls/netprobe/releases/latest).
 
+### F-Droid
+
+NetProbe is prepared for [F-Droid](https://f-droid.org/) inclusion (FOSS, MIT, no tracking). See [docs/F-DROID.md](docs/F-DROID.md) to open the fdroiddata merge request.
+
 ## Features
 
 - **Connectivity checks** — HTTP probes with latency, status codes, and error classification (timeout, DNS failure, blocked, offline)

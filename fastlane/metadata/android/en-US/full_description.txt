@@ -1,0 +1,15 @@
+NetProbe is a real-time network resource connectivity monitor. Check whether websites and online services are reachable, blocked, or slow from your network.
+
+Features:
+
+* HTTP connectivity checks with latency and status codes
+* DNS resolution and TLS certificate expiry checks
+* Built-in catalog of 100+ popular services
+* Custom URLs with optional keyword matching
+* Latency history charts per resource
+* Auto-refresh with local notifications
+* Export and import JSON backups
+* English and Russian UI
+* No analytics, no tracking — data stays on your device
+
+NetProbe is free/libre open source software (MIT).
