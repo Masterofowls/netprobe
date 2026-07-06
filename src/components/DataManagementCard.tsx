@@ -9,6 +9,7 @@ import {
   Text,
   TextInput,
 } from "react-native-paper";
+import * as DocumentPicker from "expo-document-picker";
 import { useAppStore } from "../store/useAppStore";
 import { useT } from "../hooks/useTranslation";
 import {
@@ -78,6 +79,20 @@ export const DataManagementCard: React.FC = () => {
     event.target.value = "";
   };
 
+  const handleNativeFileImport = async () => {
+    const result = await DocumentPicker.getDocumentAsync({
+      type: "application/json",
+      copyToCacheDirectory: true,
+    });
+
+    if (result.canceled || !result.assets[0]) return;
+
+    const response = await fetch(result.assets[0].uri);
+    const text = await response.text();
+    setImportText(text);
+    setImportOpen(true);
+  };
+
   return (
     <Card style={styles.card} mode="elevated">
       <Card.Content>
@@ -103,7 +118,7 @@ export const DataManagementCard: React.FC = () => {
           </Button>
         </View>
 
-        {Platform.OS === "web" && (
+        {Platform.OS === "web" ? (
           <View style={styles.webImport}>
             <input
               type="file"
@@ -112,6 +127,15 @@ export const DataManagementCard: React.FC = () => {
               style={{ color: "inherit" }}
             />
           </View>
+        ) : (
+          <Button
+            mode="text"
+            icon="file-import"
+            onPress={handleNativeFileImport}
+            style={styles.webImport}
+          >
+            {t.importFromFile}
+          </Button>
         )}
       </Card.Content>
 

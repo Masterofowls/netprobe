@@ -1,6 +1,6 @@
 {
   "name": "@masterofowls/netprobe",
-  "version": "1.5.3",
+  "version": "1.5.4",
   "description": "Real-time Network Resource Connectivity Tester for Android",
   "main": "expo-router/entry",
   "repository": {
@@ -40,6 +40,7 @@
     "expo": "~54.0.33",
     "expo-background-fetch": "~14.0.9",
     "expo-constants": "^18.0.13",
+    "expo-document-picker": "~14.0.7",
     "expo-font": "^14.0.11",
     "expo-haptics": "~15.0.8",
     "expo-linking": "^8.0.11",

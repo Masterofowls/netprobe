@@ -22,3 +22,4 @@
 - Built Windows desktop (`NetProbe-v1.5.3-setup.exe`, `NetProbe-v1.5.3.exe`); uploaded to GitHub Release v1.5.3; CI job `release-desktop-windows` for future tags
 - Local Android release build: Gradle `bundleRelease` + signing via `android/keystore.properties`; outputs `NetProbe-v1.5.3.aab` (Play) + `.apk`; versionCode 10
 - Prepared F-Droid inclusion: `infra/fdroid/metadata/com.netprobe.app.yml`, fastlane store text, `docs/F-DROID.md`, `npm run prepare:fdroid-mr`
+- Android v1.5.4 (versionCode 11): rebuilt APK/AAB with latest shared features; added native JSON file import via expo-document-picker

@@ -156,6 +156,7 @@ export interface Translations {
   exportBackup: string;
   importBackup: string;
   importBackupDesc: string;
+  importFromFile: string;
   importSuccess: string;
   importFailed: string;
   shareStatus: string;
@@ -305,6 +306,7 @@ const en: Translations = {
   exportBackup: "Export Backup",
   importBackup: "Import Backup",
   importBackupDesc: "Paste a NetProbe backup JSON file exported from this app",
+  importFromFile: "Import from file",
   importSuccess: "Backup imported successfully",
   importFailed: "Could not import backup",
   shareStatus: "Share Status",
@@ -453,6 +455,7 @@ const ru: Translations = {
   exportBackup: "Экспорт",
   importBackup: "Импорт",
   importBackupDesc: "Вставьте JSON резервной копии NetProbe",
+  importFromFile: "Импорт из файла",
   importSuccess: "Резервная копия импортирована",
   importFailed: "Не удалось импортировать",
   shareStatus: "Поделиться статусом",
