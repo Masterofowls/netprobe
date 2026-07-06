@@ -17,6 +17,8 @@ node_modules/
 
 # Metro
 .metro-health-check*
+dist/
+dist-vercel/
 
 # debug
 npm-debug.*
@@ -35,8 +37,9 @@ yarn-error.*
 
 
 # Release artifacts
-!**/*.apk
-!**/*.aab
+NetProbe-v*.apk
+NetProbe-v*.aab
+NetProbe-v*.exe
 
 
 # Build logs
@@ -48,3 +51,10 @@ memory-bank/
 
 # Auth tokens
 .npmrc
+google-service-account.json
+.env.local
+/docs/ACTIVITY_LOG.md
+/.vscode
+.vercel
+.env*
+/.cursor

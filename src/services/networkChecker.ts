@@ -1,4 +1,11 @@
-import type { CheckResult, ResourceStatus } from '../types';
+import { Platform } from "react-native";
+import type { CheckOptions, CheckResult, ResourceStatus } from "../types";
+import {
+  checkDns,
+  checkKeyword,
+  checkTls,
+  mergeDeepCheckStatus,
+} from "./deepCheck";
 import { lookupGeo } from "./geoLookup";
 
 const CONTROLLER_MAP = new Map<string, AbortController>();
@@ -12,6 +19,7 @@ export const checkResource = async (
   url: string,
   timeout: number = 10000,
   resourceId?: string,
+  options: CheckOptions = {},
 ): Promise<CheckResult> => {
   console.log(`[NetProbe] Checking ${url}...`);
   if (resourceId) {
@@ -30,44 +38,40 @@ export const checkResource = async (
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
   try {
-    const headers = {
-      "User-Agent": USER_AGENT,
-      Accept: "text/html,application/xhtml+xml",
-    };
+    const statusCode = await fetchStatusCode(url, timeout, controller.signal);
+    const checkLatency = Date.now() - startTime;
+    let status = deriveStatus(statusCode, checkLatency, timeout);
 
-    let response = await fetch(url, {
-      method: "HEAD",
-      signal: controller.signal,
-      headers,
-      redirect: "follow",
-    });
+    const [dns, tls, keyword] = await Promise.all([
+      options.enableDns
+        ? checkDns(url, controller.signal)
+        : Promise.resolve(undefined),
+      options.enableTls
+        ? checkTls(url, controller.signal)
+        : Promise.resolve(undefined),
+      options.keyword
+        ? checkKeyword(url, options.keyword, timeout, controller.signal)
+        : Promise.resolve(undefined),
+    ]);
 
-    // Retry with GET if the server rejects HEAD
-    if (HEAD_RETRY_CODES.has(response.status)) {
-      response = await fetch(url, {
-        method: "GET",
-        signal: controller.signal,
-        headers,
-        redirect: "follow",
-      });
-    }
+    status = mergeDeepCheckStatus(status, dns, tls, keyword);
 
-    const latency = Date.now() - startTime;
-    const status = deriveStatus(response.status, latency, timeout);
     console.log(
-      `[NetProbe] ${url} -> ${status} (${response.status}) ${latency}ms`,
+      `[NetProbe] ${url} -> ${status} (${statusCode}) ${checkLatency}ms`,
     );
 
-    // Fire-and-forget geo lookup (non-blocking)
     const geo = await lookupGeo(url).catch(() => null);
 
     return {
       status,
-      latency,
-      statusCode: response.status,
+      latency: checkLatency,
+      statusCode,
       timestamp: Date.now(),
-      resolvedIp: geo?.ip,
+      resolvedIp: geo?.ip ?? dns?.addresses[0],
       countryCode: geo?.countryCode,
+      dns,
+      tls,
+      keyword,
     };
   } catch (error: unknown) {
     const latency = Date.now() - startTime;
@@ -111,42 +115,92 @@ export const checkResource = async (
   }
 };
 
+const fetchStatusCode = async (
+  url: string,
+  timeout: number,
+  signal: AbortSignal,
+): Promise<number> => {
+  if (Platform.OS === "web") {
+    const proxyUrl = `/api/check?url=${encodeURIComponent(url)}&timeout=${timeout}&mode=http`;
+    const response = await fetch(proxyUrl, { signal });
+    const rawBody = await response.text();
+    let payload: { status?: number; error?: string } = {};
+
+    try {
+      payload = rawBody ? JSON.parse(rawBody) : {};
+    } catch {
+      throw new Error(
+        rawBody.slice(0, 120) || `Proxy check failed (${response.status})`,
+      );
+    }
+
+    if (!response.ok || payload.status == null) {
+      throw new Error(payload.error ?? `Proxy check failed (${response.status})`);
+    }
+
+    return payload.status;
+  }
+
+  const headers = {
+    "User-Agent": USER_AGENT,
+    Accept: "text/html,application/xhtml+xml",
+  };
+
+  let response = await fetch(url, {
+    method: "HEAD",
+    signal,
+    headers,
+    redirect: "follow",
+  });
+
+  if (HEAD_RETRY_CODES.has(response.status)) {
+    response = await fetch(url, {
+      method: "GET",
+      signal,
+      headers,
+      redirect: "follow",
+    });
+  }
+
+  return response.status;
+};
+
 const deriveStatus = (
   statusCode: number,
   latency: number,
   timeout: number,
 ): ResourceStatus => {
-  if (latency >= timeout) return 'timeout';
-  if (statusCode >= 200 && statusCode < 400) return 'online';
-  if (statusCode === 403 || statusCode === 451) return 'blocked';
-  if (statusCode >= 500) return 'error';
-  return 'offline';
+  if (latency >= timeout) return "timeout";
+  if (statusCode >= 200 && statusCode < 400) return "online";
+  if (statusCode === 403 || statusCode === 451) return "blocked";
+  if (statusCode >= 500) return "error";
+  return "offline";
 };
 
 const deriveErrorStatus = (message: string): ResourceStatus => {
   const lower = message.toLowerCase();
-  if (lower.includes('network') || lower.includes('failed to fetch')) {
-    return 'offline';
+  if (lower.includes("network") || lower.includes("failed to fetch")) {
+    return "offline";
   }
-  if (lower.includes('dns') || lower.includes('getaddrinfo')) {
-    return 'dns_failure';
+  if (lower.includes("dns") || lower.includes("getaddrinfo")) {
+    return "dns_failure";
   }
-  if (lower.includes('timeout') || lower.includes('timed out')) {
-    return 'timeout';
+  if (lower.includes("timeout") || lower.includes("timed out")) {
+    return "timeout";
   }
-  if (lower.includes('blocked') || lower.includes('forbidden')) {
-    return 'blocked';
+  if (lower.includes("blocked") || lower.includes("forbidden")) {
+    return "blocked";
   }
-  return 'error';
+  return "error";
 };
 
 export const checkMultipleResources = async (
-  urls: { id: string; url: string }[],
+  urls: { id: string; url: string; options?: CheckOptions }[],
   timeout: number = 10000,
 ): Promise<Map<string, CheckResult>> => {
   const results = new Map<string, CheckResult>();
-  const checks = urls.map(async ({ id, url }) => {
-    const result = await checkResource(url, timeout, id);
+  const checks = urls.map(async ({ id, url, options }) => {
+    const result = await checkResource(url, timeout, id, options);
     results.set(id, result);
   });
   await Promise.allSettled(checks);

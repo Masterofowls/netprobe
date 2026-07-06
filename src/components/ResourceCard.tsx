@@ -125,6 +125,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginVertical: 6,
     borderRadius: 16,
+    flex: 1,
   },
   ripple: {
     borderRadius: 16,

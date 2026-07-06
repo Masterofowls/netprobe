@@ -1,0 +1,10 @@
+{
+  "buildCommand": "npx expo export -p web && node scripts/prepare-vercel-dist.mjs",
+  "outputDirectory": "dist-vercel",
+  "rewrites": [
+    {
+      "source": "/((?!api/|_expo/|favicon.ico|sw.js|manifest.webmanifest|robots.txt).*)",
+      "destination": "/index.html"
+    }
+  ]
+}

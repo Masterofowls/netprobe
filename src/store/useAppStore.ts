@@ -16,7 +16,9 @@ import { hapticForStatus } from "../services/haptics";
 import { updateWidgetData } from "../services/widgetBridge";
 import type {
   AppSettings,
+  CheckOptions,
   CheckResult,
+  NetProbeBackup,
   NetworkState,
   Resource,
   SortMode,
@@ -26,6 +28,15 @@ const STORAGE_KEYS = {
   RESOURCES: "@netprobe_resources",
   SETTINGS: "@netprobe_settings",
 };
+
+const getCheckOptions = (
+  resource: Resource,
+  settings: AppSettings,
+): CheckOptions => ({
+  enableDns: settings.enableDnsCheck,
+  enableTls: settings.enableTlsCheck,
+  keyword: resource.keyword,
+});
 
 const buildBuiltInResources = (enabledIds: string[]): Resource[] =>
   RESOURCE_CATALOG.filter((e) => enabledIds.includes(e.id)).map(
@@ -54,6 +65,7 @@ interface AppState {
   setCatalogResources: (ids: string[]) => Promise<void>;
   togglePin: (id: string) => Promise<void>;
   getVisibleResources: () => Resource[];
+  importBackup: (backup: NetProbeBackup) => Promise<void>;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -170,6 +182,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       resource.url,
       settings.timeout,
       resource.id,
+      getCheckOptions(resource, settings),
     );
 
     const updatedResource = {
@@ -227,6 +240,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         resource.url,
         settings.timeout,
         resource.id,
+        getCheckOptions(resource, settings),
       );
       set({
         resources: get().resources.map((r) =>
@@ -381,5 +395,28 @@ export const useAppStore = create<AppState>((set, get) => ({
     const pinned = list.filter((r) => settings.pinnedIds.includes(r.id));
     const unpinned = list.filter((r) => !settings.pinnedIds.includes(r.id));
     return [...pinned, ...unpinned];
+  },
+
+  importBackup: async (backup) => {
+    const mergedSettings = { ...DEFAULT_SETTINGS, ...backup.settings };
+    const customResources = backup.customResources.map((resource) => ({
+      ...resource,
+      isBuiltIn: false,
+    }));
+
+    await AsyncStorage.setItem(
+      STORAGE_KEYS.RESOURCES,
+      JSON.stringify(customResources),
+    );
+    await AsyncStorage.setItem(
+      STORAGE_KEYS.SETTINGS,
+      JSON.stringify(mergedSettings),
+    );
+
+    const builtIn = buildBuiltInResources(mergedSettings.enabledCatalogIds);
+    set({
+      settings: mergedSettings,
+      resources: [...builtIn, ...customResources],
+    });
   },
 }));

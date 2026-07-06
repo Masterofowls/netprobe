@@ -1,19 +1,22 @@
 import * as Haptics from "expo-haptics";
+import { Platform } from "react-native";
 import type { ResourceStatus } from "../types";
 
-export const hapticSuccess = async (): Promise<void> => {
+const noop = async (): Promise<void> => {};
+
+export const hapticSuccess = Platform.OS === "web" ? noop : async (): Promise<void> => {
   await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 };
 
-export const hapticWarning = async (): Promise<void> => {
+export const hapticWarning = Platform.OS === "web" ? noop : async (): Promise<void> => {
   await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
 };
 
-export const hapticError = async (): Promise<void> => {
+export const hapticError = Platform.OS === "web" ? noop : async (): Promise<void> => {
   await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
 };
 
-export const hapticLight = async (): Promise<void> => {
+export const hapticLight = Platform.OS === "web" ? noop : async (): Promise<void> => {
   await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 };
 

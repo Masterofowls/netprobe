@@ -1,5 +1,6 @@
 import * as BackgroundFetch from "expo-background-fetch";
 import * as TaskManager from "expo-task-manager";
+import { Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { DEFAULT_RESOURCES, DEFAULT_SETTINGS } from "../constants/resources";
 import { checkResource } from "./networkChecker";
@@ -9,7 +10,8 @@ import type { AppSettings, Resource } from "../types";
 
 const BACKGROUND_TASK_NAME = "NETPROBE_BACKGROUND_CHECK";
 
-TaskManager.defineTask(BACKGROUND_TASK_NAME, async () => {
+if (Platform.OS !== "web") {
+  TaskManager.defineTask(BACKGROUND_TASK_NAME, async () => {
   console.log("[NetProbe] Background check starting...");
   try {
     const settingsJson = await AsyncStorage.getItem("@netprobe_settings");
@@ -31,7 +33,13 @@ TaskManager.defineTask(BACKGROUND_TASK_NAME, async () => {
     let offline = 0;
 
     const results = await Promise.allSettled(
-      allResources.map((r) => checkResource(r.url, settings.timeout, r.id)),
+      allResources.map((r) =>
+        checkResource(r.url, settings.timeout, r.id, {
+          enableDns: settings.enableDnsCheck,
+          enableTls: settings.enableTlsCheck,
+          keyword: r.keyword,
+        }),
+      ),
     );
 
     for (const result of results) {
@@ -58,9 +66,11 @@ TaskManager.defineTask(BACKGROUND_TASK_NAME, async () => {
     console.error("[NetProbe] Background check failed:", error);
     return BackgroundFetch.BackgroundFetchResult.Failed;
   }
-});
+  });
+}
 
 export const registerBackgroundTask = async (): Promise<void> => {
+  if (Platform.OS === "web") return;
   const isRegistered =
     await TaskManager.isTaskRegisteredAsync(BACKGROUND_TASK_NAME);
   if (isRegistered) {
@@ -77,6 +87,7 @@ export const registerBackgroundTask = async (): Promise<void> => {
 };
 
 export const unregisterBackgroundTask = async (): Promise<void> => {
+  if (Platform.OS === "web") return;
   const isRegistered =
     await TaskManager.isTaskRegisteredAsync(BACKGROUND_TASK_NAME);
   if (isRegistered) {
@@ -89,6 +100,9 @@ export const getBackgroundTaskStatus = async (): Promise<{
   isRegistered: boolean;
   status: BackgroundFetch.BackgroundFetchStatus | null;
 }> => {
+  if (Platform.OS === "web") {
+    return { isRegistered: false, status: null };
+  }
   const isRegistered =
     await TaskManager.isTaskRegisteredAsync(BACKGROUND_TASK_NAME);
   const status = await BackgroundFetch.getStatusAsync();

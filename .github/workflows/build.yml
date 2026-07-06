@@ -85,14 +85,16 @@ jobs:
             --title "NetProbe v${VERSION}" \
             --notes "## NetProbe v${VERSION}
 
-          Real-time network resource connectivity tester for Android.
+          Real-time network resource connectivity tester for Android and Windows.
 
-          ### Install via Komi Store
+          ### Install via Komi Store (Android)
           Search for **NetProbe** in [Komi Store](https://komistore.app/) or open this repo URL in the app.
 
           ### Direct download
           - **NetProbe-v${VERSION}.apk** — Android installer (sideload / Komi Store)
-          - **NetProbe-v${VERSION}.aab** — Google Play bundle" \
+          - **NetProbe-v${VERSION}.aab** — Google Play bundle
+          - **NetProbe-v${VERSION}-setup.exe** — Windows installer (Tauri desktop)
+          - **NetProbe-v${VERSION}.exe** — Windows portable desktop app" \
             --generate-notes \
             || true
         env:
@@ -104,6 +106,71 @@ jobs:
           gh release upload "${{ github.ref_name }}" \
             NetProbe-v*.apk \
             NetProbe-v*.aab \
+            --clobber
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  release-desktop-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/desktop/package-lock.json
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: apps/desktop/src-tauri
+
+      - name: Install desktop dependencies
+        working-directory: apps/desktop
+        run: npm ci
+
+      - name: Build Windows desktop (NSIS installer + portable exe)
+        working-directory: apps/desktop
+        run: npm run tauri:build -- --bundles nsis
+
+      - name: Prepare desktop release artifacts
+        shell: pwsh
+        run: |
+          $VERSION = "${{ github.ref_name }}" -replace '^v',''
+          ./scripts/prepare-desktop-release.ps1 -Version $VERSION
+
+      - name: Upload Windows desktop artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: NetProbe-release-desktop-windows
+          path: |
+            NetProbe-v*-setup.exe
+            NetProbe-v*.exe
+          if-no-files-found: error
+
+      - name: Create release if missing
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        run: |
+          $VERSION = "${{ github.ref_name }}" -replace '^v',''
+          $exists = gh release view "${{ github.ref_name }}" 2>$null
+          if (-not $?) {
+            gh release create "${{ github.ref_name }}" `
+              --title "NetProbe v$VERSION" `
+              --generate-notes
+          }
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Attach Windows desktop to release
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        run: |
+          gh release upload "${{ github.ref_name }}" `
+            (Get-ChildItem "NetProbe-v*-setup.exe").FullName `
+            (Get-ChildItem "NetProbe-v*.exe" | Where-Object { $_.Name -notmatch '-setup\.exe$' }).FullName `
             --clobber
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

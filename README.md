@@ -1,22 +1,40 @@
 # NetProbe
 
-Real-time network resource connectivity tester for Android. Check whether websites and services are reachable, blocked, or slow from your network — with latency charts, geo IP lookup, and a built-in catalog of 100+ services.
+Real-time network resource connectivity tester for **Android**, **web**, and **desktop (Windows/Linux)**. Check whether websites and services are reachable, blocked, or slow from your network — with latency charts, DNS/TLS checks, geo IP lookup, and a built-in catalog of 100+ services.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Release](https://img.shields.io/github/v/release/Masterofowls/netprobe)](https://github.com/Masterofowls/netprobe/releases/latest)
+[![Web App](https://img.shields.io/badge/Web-netprobe--1.vercel.app-6C63FF)](https://netprobe-1.vercel.app)
 [![Komi Store](https://img.shields.io/badge/Install-Komi%20Store-6C63FF)](https://komistore.app/)
 
 ## Install
 
-### Komi Store (recommended)
+### Web App (no install required)
+
+Use NetProbe in your browser — works on desktop and mobile:
+
+**[https://netprobe-1.vercel.app](https://netprobe-1.vercel.app)**
+
+The web app is a Progressive Web App (PWA). Use your browser’s “Install” or “Add to Home Screen” option for an app-like experience.
+
+### Desktop (Windows & Linux)
+
+Native desktop app built with **Tauri 2** + React. Rust-backed probes (no CORS proxy), geo lookup, export/import, and desktop notifications.
+
+```bash
+npm run dev:desktop      # development
+npm run build:desktop    # production installers
+```
+
+See [apps/desktop/README.md](apps/desktop/README.md) for prerequisites and build output paths.
+
+### Komi Store (Android)
 
 NetProbe is available on [Komi Store](https://komistore.app/) — the open-source app store for GitHub releases.
 
 1. Install [Komi Store](https://komistore.app/) on your Android device
 2. Search for **NetProbe** or open [github.com/Masterofowls/netprobe](https://github.com/Masterofowls/netprobe) in the app
 3. Tap **Install latest** to download the APK
-
-Komi Store verifies release assets and can auto-update when new versions are published.
 
 ### GitHub Releases
 
@@ -25,27 +43,28 @@ Download the latest APK directly from [GitHub Releases](https://github.com/Maste
 ## Features
 
 - **Connectivity checks** — HTTP probes with latency, status codes, and error classification (timeout, DNS failure, blocked, offline)
+- **Deep checks** — DNS resolution, TLS certificate validity/expiry, optional page keyword matching
 - **Resource catalog** — 100+ built-in services across search engines, social media, streaming, cloud, and developer tools
-- **Custom resources** — Add your own URLs to monitor
+- **Custom resources** — Add your own URLs and optional expected keywords to monitor
 - **Latency history** — Charts and history per resource
-- **Geo IP lookup** — See your approximate location, country flag, and ISP
-- **Auto-refresh** — Configurable background checks with local notifications
-- **Home screen widget** — At-a-glance status on your launcher
+- **Geo IP lookup** — See resolved IP, country flag, and approximate location
+- **Auto-refresh** — Configurable periodic checks with local notifications (Android)
+- **Export & backup** — Export/import JSON backups and share status snapshots
+- **Home screen widget** — At-a-glance status on your Android launcher
 - **Bilingual UI** — English and Russian
 - **Privacy-first** — No analytics, no tracking, all data stays on device
 
-## Screenshots
+## Web development
 
-<p align="center">
-  <img src="assets/icon.png" alt="NetProbe icon" width="128" />
-</p>
+```bash
+npm ci
+npm run web          # local dev server
+npm run build:web    # static export to dist/
+```
 
-## Requirements
+Deploy to Vercel (or any static host). The `/api/check` serverless function proxies uptime checks to avoid browser CORS limits.
 
-- Android 7.0+ (API 24)
-- Internet access
-
-## Build from source
+## Android build from source
 
 ```bash
 git clone https://github.com/Masterofowls/netprobe.git
@@ -67,4 +86,4 @@ MIT — see [LICENSE](LICENSE).
 
 ## Topics
 
-`android` `mobile` `apk` `network` `connectivity` `ping` `react-native` `expo` `open-source`
+`android` `web` `pwa` `mobile` `apk` `network` `connectivity` `monitoring` `react-native` `expo` `open-source`

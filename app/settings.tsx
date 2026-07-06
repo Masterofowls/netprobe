@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Platform, ScrollView, StyleSheet, View } from 'react-native';
 import {
   Button,
   Card,
@@ -14,6 +14,10 @@ import { useRouter } from "expo-router";
 import { useAppStore } from "../src/store/useAppStore";
 import { RESOURCE_CATALOG } from "../src/constants/catalog";
 import { useT } from "../src/hooks/useTranslation";
+import {
+  DataManagementCard,
+  DeepChecksCard,
+} from "../src/components/DataManagementCard";
 
 const INTERVAL_OPTIONS = [
   { label: "15s", value: 15000 },
@@ -153,6 +157,9 @@ export default function SettingsScreen() {
         </Card.Content>
       </Card>
 
+      <DeepChecksCard settings={settings} updateSettings={updateSettings} />
+      <DataManagementCard />
+
       {/* Resource Catalog */}
       <Card style={styles.card} mode="elevated">
         <Card.Content>
@@ -185,7 +192,8 @@ export default function SettingsScreen() {
         </Card.Content>
       </Card>
 
-      {/* System Integration */}
+      {/* System Integration (native only) */}
+      {Platform.OS !== "web" && (
       <Card style={styles.card} mode="elevated">
         <Card.Content>
           <Text variant="titleMedium" style={styles.sectionTitle}>
@@ -234,6 +242,7 @@ export default function SettingsScreen() {
           />
         </Card.Content>
       </Card>
+      )}
 
       {/* Stats */}
       <Card style={styles.card} mode="elevated">
@@ -290,7 +299,7 @@ export default function SettingsScreen() {
           variant="labelSmall"
           style={{ color: theme.colors.onSurfaceVariant, textAlign: "center" }}
         >
-          NetProbe v1.4.0{"\n"}
+          NetProbe v1.5.3{"\n"}
           {t.appTagline}
         </Text>
       </View>

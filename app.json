@@ -19,7 +19,7 @@
     },
     "android": {
       "package": "com.netprobe.app",
-      "versionCode": 7,
+      "versionCode": 9,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#1a1a2e"
@@ -35,7 +35,13 @@
     },
     "web": {
       "favicon": "./assets/favicon.png",
-      "bundler": "metro"
+      "bundler": "metro",
+      "output": "server",
+      "name": "NetProbe",
+      "shortName": "NetProbe",
+      "description": "Real-time network resource connectivity monitor",
+      "themeColor": "#1a1a2e",
+      "backgroundColor": "#1a1a2e"
     },
     "plugins": [
       "expo-router",
@@ -47,6 +53,13 @@
         }
       ],
       "./plugins/withAdiRegistration"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "9160faf5-684e-46e4-bce7-42b369e6d06f"
+      }
+    },
+    "owner": "froggytalents"
   }
 }

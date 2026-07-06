@@ -134,6 +134,32 @@ export interface Translations {
   openInBrowser: string;
   ipAddress: string;
   country: string;
+
+  // Deep checks
+  deepChecks: string;
+  deepChecksDesc: string;
+  dnsCheck: string;
+  tlsCheck: string;
+  keywordCheck: string;
+  keywordOptional: string;
+  keywordPlaceholder: string;
+  certExpires: string;
+  daysLeft: string;
+  notResolved: string;
+  invalidCert: string;
+  keywordMissing: string;
+  keywordFound: string;
+
+  // Data management
+  dataManagement: string;
+  dataManagementDesc: string;
+  exportBackup: string;
+  importBackup: string;
+  importBackupDesc: string;
+  importSuccess: string;
+  importFailed: string;
+  shareStatus: string;
+  copiedToClipboard: string;
 }
 
 const en: Translations = {
@@ -259,6 +285,30 @@ const en: Translations = {
   openInBrowser: "Open in Browser",
   ipAddress: "IP Address",
   country: "Country",
+
+  deepChecks: "Deep Checks",
+  deepChecksDesc: "Run DNS and TLS certificate checks alongside HTTP probes",
+  dnsCheck: "DNS resolution",
+  tlsCheck: "TLS certificate",
+  keywordCheck: "Page keyword",
+  keywordOptional: "Expected keyword (optional)",
+  keywordPlaceholder: "e.g., Welcome",
+  certExpires: "Certificate valid",
+  daysLeft: "days left",
+  notResolved: "DNS not resolved",
+  invalidCert: "Invalid or expired certificate",
+  keywordMissing: "Keyword not found in page",
+  keywordFound: "Found",
+
+  dataManagement: "Data & Backup",
+  dataManagementDesc: "Export settings, import a backup, or share a status snapshot",
+  exportBackup: "Export Backup",
+  importBackup: "Import Backup",
+  importBackupDesc: "Paste a NetProbe backup JSON file exported from this app",
+  importSuccess: "Backup imported successfully",
+  importFailed: "Could not import backup",
+  shareStatus: "Share Status",
+  copiedToClipboard: "Status copied to clipboard",
 };
 
 const ru: Translations = {
@@ -383,6 +433,30 @@ const ru: Translations = {
   openInBrowser: "Открыть в браузере",
   ipAddress: "IP адрес",
   country: "Страна",
+
+  deepChecks: "Расширенные проверки",
+  deepChecksDesc: "DNS и TLS проверки вместе с HTTP",
+  dnsCheck: "DNS разрешение",
+  tlsCheck: "TLS сертификат",
+  keywordCheck: "Ключевое слово",
+  keywordOptional: "Ожидаемое слово (необязательно)",
+  keywordPlaceholder: "напр., Welcome",
+  certExpires: "Сертификат действителен",
+  daysLeft: "дней осталось",
+  notResolved: "DNS не разрешён",
+  invalidCert: "Недействительный сертификат",
+  keywordMissing: "Слово не найдено на странице",
+  keywordFound: "Найдено",
+
+  dataManagement: "Данные и резервные копии",
+  dataManagementDesc: "Экспорт, импорт и отправка статуса",
+  exportBackup: "Экспорт",
+  importBackup: "Импорт",
+  importBackupDesc: "Вставьте JSON резервной копии NetProbe",
+  importSuccess: "Резервная копия импортирована",
+  importFailed: "Не удалось импортировать",
+  shareStatus: "Поделиться статусом",
+  copiedToClipboard: "Статус скопирован",
 };
 
 const translations: Record<Locale, Translations> = { en, ru };

@@ -1,3 +1,5 @@
+import { Platform } from "react-native";
+
 export interface GeoInfo {
   ip: string;
   countryCode: string;
@@ -7,10 +9,7 @@ const cache = new Map<string, GeoInfo>();
 
 const countryFlags: Record<string, string> = {};
 
-/**
- * Convert a 2-letter ISO country code to a flag emoji.
- * Uses regional indicator symbols: 🇺🇸 = \uD83C\uDDFA\uD83C\uDDF8
- */
+
 export const countryCodeToFlag = (code: string): string => {
   if (!code || code.length !== 2) return '';
   const upper = code.toUpperCase();
@@ -22,11 +21,11 @@ export const countryCodeToFlag = (code: string): string => {
   return flag;
 };
 
-/**
- * Resolve IP + country for a given URL hostname.
- * Uses ip-api.com (free, no key, 45 req/min).
- */
+
 export const lookupGeo = async (url: string): Promise<GeoInfo | null> => {
+  // ip-api.com blocks browser requests (403); DNS data is shown from deep checks instead.
+  if (Platform.OS === "web") return null;
+
   try {
     const hostname = new URL(url).hostname;
     if (cache.has(hostname)) return cache.get(hostname)!;
@@ -35,7 +34,7 @@ export const lookupGeo = async (url: string): Promise<GeoInfo | null> => {
     const timer = setTimeout(() => controller.abort(), 5000);
 
     const res = await fetch(
-      `http://ip-api.com/json/${hostname}?fields=query,countryCode`,
+      `https://ip-api.com/json/${hostname}?fields=query,countryCode`,
       { signal: controller.signal },
     );
     clearTimeout(timer);

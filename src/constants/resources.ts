@@ -30,4 +30,6 @@ export const DEFAULT_SETTINGS = {
   language: "en" as const,
   pinnedIds: [] as string[],
   sortMode: "default" as const,
+  enableDnsCheck: true,
+  enableTlsCheck: true,
 };

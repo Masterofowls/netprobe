@@ -46,6 +46,7 @@ export default function AddResourceScreen() {
   const [name, setName] = useState("");
   const [url, setUrl] = useState("https://");
   const [category, setCategory] = useState("");
+  const [keyword, setKeyword] = useState("");
   const [selectedIcon, setSelectedIcon] = useState("web");
   const [selectedColor, setSelectedColor] = useState("#2196F3");
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -79,6 +80,7 @@ export default function AddResourceScreen() {
       icon: selectedIcon,
       color: selectedColor,
       category: category.trim() || undefined,
+      keyword: keyword.trim() || undefined,
     });
 
     router.back();
@@ -137,6 +139,16 @@ export default function AddResourceScreen() {
         mode="outlined"
         style={styles.input}
         placeholder={t.categoryPlaceholder}
+      />
+
+      <TextInput
+        label={t.keywordOptional}
+        value={keyword}
+        onChangeText={setKeyword}
+        mode="outlined"
+        style={styles.input}
+        placeholder={t.keywordPlaceholder}
+        autoCapitalize="none"
       />
 
       <Text variant="titleMedium" style={styles.sectionTitle}>

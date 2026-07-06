@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useColorScheme } from 'react-native';
+import { Platform, useColorScheme } from 'react-native';
 import { PaperProvider } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Stack } from 'expo-router';
@@ -15,6 +15,8 @@ import {
   registerBackgroundTask,
   unregisterBackgroundTask,
 } from "../src/services/backgroundTask";
+import { DesktopShell } from "../src/components/DesktopShell";
+import { usePwa } from "../src/hooks/usePwa";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -24,6 +26,7 @@ export default function RootLayout() {
   const [ready, setReady] = useState(false);
   const networkState = useNetworkMonitor();
   const t = useT();
+  usePwa();
 
   const resolvedTheme =
     settings.theme === "system" ? colorScheme : settings.theme;
@@ -34,16 +37,17 @@ export default function RootLayout() {
       console.log("[NetProbe] Initializing app...");
       await loadData();
 
-      // Setup notifications
-      if (settings.notificationsEnabled) {
-        await setupNotifications();
-      }
+      // Native-only integrations
+      if (Platform.OS !== "web") {
+        if (settings.notificationsEnabled) {
+          await setupNotifications();
+        }
 
-      // Setup background fetch
-      if (settings.backgroundCheckEnabled) {
-        await registerBackgroundTask();
-      } else {
-        await unregisterBackgroundTask();
+        if (settings.backgroundCheckEnabled) {
+          await registerBackgroundTask();
+        } else {
+          await unregisterBackgroundTask();
+        }
       }
 
       console.log("[NetProbe] Data loaded, app ready");
@@ -62,9 +66,10 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <PaperProvider theme={theme}>
-        <StatusBar style={resolvedTheme === "dark" ? "light" : "dark"} />
-        <NetworkBanner networkState={networkState} />
-        <Stack
+        <DesktopShell>
+          <StatusBar style={resolvedTheme === "dark" ? "light" : "dark"} />
+          <NetworkBanner networkState={networkState} />
+          <Stack
           screenOptions={{
             headerStyle: {
               backgroundColor: theme.colors.surface,
@@ -109,6 +114,7 @@ export default function RootLayout() {
             }}
           />
         </Stack>
+        </DesktopShell>
       </PaperProvider>
     </SafeAreaProvider>
   );

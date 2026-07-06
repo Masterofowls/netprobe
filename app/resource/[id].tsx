@@ -12,6 +12,7 @@ import {
 } from 'react-native-paper';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as Linking from "expo-linking";
+import { DeepCheckPanel } from "../../src/components/DeepCheckPanel";
 import { LatencyChart } from "../../src/components/LatencyChart";
 import { StatusBadge } from "../../src/components/StatusBadge";
 import { useAppStore } from "../../src/store/useAppStore";
@@ -155,6 +156,21 @@ export default function ResourceDetailScreen() {
               </Text>
             </View>
           )}
+          <DeepCheckPanel
+            check={lastCheck}
+            labels={{
+              deepChecks: t.deepChecks,
+              dns: t.dnsCheck,
+              tls: t.tlsCheck,
+              keyword: t.keywordCheck,
+              certExpires: t.certExpires,
+              daysLeft: t.daysLeft,
+              notResolved: t.notResolved,
+              invalidCert: t.invalidCert,
+              keywordMissing: t.keywordMissing,
+              keywordFound: t.keywordFound,
+            }}
+          />
         </Card.Content>
       </Card>
 

@@ -2,13 +2,13 @@ import React, { useCallback, useEffect, useState } from "react";
 import {
   FlatList,
   Image,
+  Platform,
   RefreshControl,
   StyleSheet,
   View,
 } from "react-native";
 import {
   AnimatedFAB,
-  Appbar,
   Button,
   Chip,
   Dialog,
@@ -25,6 +25,7 @@ import { useRouter } from "expo-router";
 import { ResourceCard } from "../src/components/ResourceCard";
 import { StatusSummary } from "../src/components/StatusSummary";
 import { useAutoRefresh } from "../src/hooks/useAutoRefresh";
+import { useIsDesktop } from "../src/hooks/useLayout";
 import { useAppStore } from "../src/store/useAppStore";
 import { useT } from "../src/hooks/useTranslation";
 import { hapticLight } from "../src/services/haptics";
@@ -43,6 +44,7 @@ export default function DashboardScreen() {
   const theme = useTheme();
   const router = useRouter();
   const t = useT();
+  const isDesktop = useIsDesktop();
   const {
     resources,
     isChecking,
@@ -128,18 +130,20 @@ export default function DashboardScreen() {
 
   const renderItem = useCallback(
     ({ item }: { item: Resource }) => (
-      <ResourceCard
-        resource={item}
-        pinned={settings.pinnedIds.includes(item.id)}
-        faviconUrl={!item.isBuiltIn ? FAVICON_URL(item.url) : undefined}
-        onPress={() => {
-          if (settings.hapticFeedback) hapticLight().catch(() => {});
-          router.push(`/resource/${item.id}`);
-        }}
-        onLongPress={() => handleTogglePin(item.id)}
-      />
+      <View style={isDesktop ? styles.gridItem : undefined}>
+        <ResourceCard
+          resource={item}
+          pinned={settings.pinnedIds.includes(item.id)}
+          faviconUrl={!item.isBuiltIn ? FAVICON_URL(item.url) : undefined}
+          onPress={() => {
+            if (settings.hapticFeedback) hapticLight().catch(() => {});
+            router.push(`/resource/${item.id}`);
+          }}
+          onLongPress={() => handleTogglePin(item.id)}
+        />
+      </View>
     ),
-    [router, settings.hapticFeedback, settings.pinnedIds],
+    [router, settings.hapticFeedback, settings.pinnedIds, isDesktop],
   );
 
   const lastCheckTime = lastFullCheck
@@ -261,6 +265,9 @@ export default function DashboardScreen() {
         data={filteredResources}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
+        key={isDesktop ? "desktop-grid" : "mobile-list"}
+        numColumns={isDesktop ? 2 : 1}
+        columnWrapperStyle={isDesktop ? styles.columnWrapper : undefined}
         onScroll={onScroll}
         contentContainerStyle={styles.list}
         refreshControl={
@@ -282,14 +289,26 @@ export default function DashboardScreen() {
         }
       />
 
-      <AnimatedFAB
-        icon="plus"
-        label={t.addResource}
-        extended={isExtended}
-        onPress={() => router.push("/add-resource")}
-        style={[styles.fab, { backgroundColor: theme.colors.primaryContainer }]}
-        color={theme.colors.onPrimaryContainer}
-      />
+      {Platform.OS === "web" ? (
+        <Button
+          mode="contained"
+          icon="plus"
+          onPress={() => router.push("/add-resource")}
+          style={[styles.fab, { backgroundColor: theme.colors.primaryContainer }]}
+          textColor={theme.colors.onPrimaryContainer}
+        >
+          {t.addResource}
+        </Button>
+      ) : (
+        <AnimatedFAB
+          icon="plus"
+          label={t.addResource}
+          extended={isExtended}
+          onPress={() => router.push("/add-resource")}
+          style={[styles.fab, { backgroundColor: theme.colors.primaryContainer }]}
+          color={theme.colors.onPrimaryContainer}
+        />
+      )}
 
       {/* ── Quick Add Dialog ── */}
       <Portal>
@@ -350,6 +369,13 @@ const styles = StyleSheet.create({
     paddingTop: 48,
     paddingHorizontal: 12,
     paddingBottom: 8,
+  },
+  columnWrapper: {
+    gap: 8,
+    paddingHorizontal: 8,
+  },
+  gridItem: {
+    flex: 1,
   },
   headerTop: {
     flexDirection: "row",
