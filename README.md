@@ -21,12 +21,6 @@ The web app is a Progressive Web App (PWA). Use your browser’s “Install” o
 
 Native desktop app built with **Tauri 2** + React. Rust-backed probes (no CORS proxy), geo lookup, export/import, and desktop notifications.
 
-```bash
-npm run dev:desktop      # development
-npm run build:desktop    # production installers
-```
-
-See [apps/desktop/README.md](apps/desktop/README.md) for prerequisites and build output paths.
 
 ### Komi Store (Android)
 
@@ -40,9 +34,6 @@ NetProbe is available on [Komi Store](https://komistore.app/) — the open-sourc
 
 Download the latest APK directly from [GitHub Releases](https://github.com/Masterofowls/netprobe/releases/latest).
 
-### F-Droid
-
-NetProbe is prepared for [F-Droid](https://f-droid.org/) inclusion (FOSS, MIT, no tracking). See [docs/F-DROID.md](docs/F-DROID.md) to open the fdroiddata merge request.
 
 ## Features
 
@@ -58,27 +49,6 @@ NetProbe is prepared for [F-Droid](https://f-droid.org/) inclusion (FOSS, MIT, n
 - **Bilingual UI** — English and Russian
 - **Privacy-first** — No analytics, no tracking, all data stays on device
 
-## Web development
-
-```bash
-npm ci
-npm run web          # local dev server
-npm run build:web    # static export to dist/
-```
-
-Deploy to Vercel (or any static host). The `/api/check` serverless function proxies uptime checks to avoid browser CORS limits.
-
-## Android build from source
-
-```bash
-git clone https://github.com/Masterofowls/netprobe.git
-cd netprobe
-npm ci
-npx expo prebuild --platform android
-cd android && ./gradlew assembleRelease
-```
-
-The release APK is at `android/app/build/outputs/apk/release/app-release.apk`.
 
 ## Privacy
 
