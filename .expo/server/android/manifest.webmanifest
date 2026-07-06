@@ -1,0 +1,19 @@
+{
+  "name": "NetProbe",
+  "short_name": "NetProbe",
+  "description": "Real-time network resource connectivity monitor for websites and services.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#1a1a2e",
+  "theme_color": "#1a1a2e",
+  "categories": ["utilities", "productivity"],
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    }
+  ]
+}

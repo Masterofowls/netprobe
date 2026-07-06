@@ -14,6 +14,7 @@ app/build/outputs/*
 .idea
 .gradle
 local.properties
+keystore.properties
 *.iml
 *.hprof
 .cxx/

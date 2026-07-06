@@ -20,3 +20,4 @@
 - Fixed Vercel 404: `web.output: server` splits assets into `dist/client` + HTML into `dist/server`; added `scripts/prepare-vercel-dist.mjs` and `dist-vercel` output for Vercel
 - Added Tauri desktop app (`apps/desktop`) for Windows & Linux — React UI, Rust probes, export/import, notifications
 - Built Windows desktop (`NetProbe-v1.5.3-setup.exe`, `NetProbe-v1.5.3.exe`); uploaded to GitHub Release v1.5.3; CI job `release-desktop-windows` for future tags
+- Local Android release build: Gradle `bundleRelease` + signing via `android/keystore.properties`; outputs `NetProbe-v1.5.3.aab` (Play) + `.apk`; versionCode 10

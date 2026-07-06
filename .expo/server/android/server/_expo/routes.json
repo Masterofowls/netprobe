@@ -1,0 +1,14 @@
+{
+  "apiRoutes": [
+    {
+      "file": "_expo/functions/api/check+api.js",
+      "page": "/api/check",
+      "namedRegex": "^/api/check(?:/)?$",
+      "routeKeys": {}
+    }
+  ],
+  "htmlRoutes": [],
+  "notFoundRoutes": [],
+  "redirects": [],
+  "rewrites": []
+}
