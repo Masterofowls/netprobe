@@ -59,21 +59,42 @@ jobs:
       - name: Build AAB
         run: cd android && ./gradlew bundleRelease
 
+      - name: Prepare release artifacts
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          cp android/app/build/outputs/apk/release/app-release.apk "NetProbe-v${VERSION}.apk"
+          cp android/app/build/outputs/bundle/release/app-release.aab "NetProbe-v${VERSION}.aab"
+
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: NetProbe-release-apk
-          path: android/app/build/outputs/apk/release/app-release.apk
+          path: NetProbe-v*.apk
 
       - name: Upload AAB artifact
         uses: actions/upload-artifact@v4
         with:
           name: NetProbe-release-aab
-          path: android/app/build/outputs/bundle/release/app-release.aab
+          path: NetProbe-v*.aab
 
       - name: Create release if missing
         if: startsWith(github.ref, 'refs/tags/v')
-        run: gh release create "${{ github.ref_name }}" --generate-notes || true
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          gh release create "${{ github.ref_name }}" \
+            --title "NetProbe v${VERSION}" \
+            --notes "## NetProbe v${VERSION}
+
+          Real-time network resource connectivity tester for Android.
+
+          ### Install via Komi Store
+          Search for **NetProbe** in [Komi Store](https://komistore.app/) or open this repo URL in the app.
+
+          ### Direct download
+          - **NetProbe-v${VERSION}.apk** — Android installer (sideload / Komi Store)
+          - **NetProbe-v${VERSION}.aab** — Google Play bundle" \
+            --generate-notes \
+            || true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -81,8 +102,8 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v')
         run: |
           gh release upload "${{ github.ref_name }}" \
-            android/app/build/outputs/apk/release/app-release.apk \
-            android/app/build/outputs/bundle/release/app-release.aab \
+            NetProbe-v*.apk \
+            NetProbe-v*.aab \
             --clobber
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -2,10 +2,85 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="refresh" content="0; url=privacy-policy.html">
-  <title>NetProbe</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NetProbe — Network Connectivity Tester</title>
+  <meta name="description" content="Real-time network resource connectivity tester for Android. Available on Komi Store and GitHub Releases.">
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #0f0f1a;
+      --card: #1a1a2e;
+      --text: #e8e8f0;
+      --muted: #9a9ab0;
+      --accent: #6c63ff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      line-height: 1.6;
+    }
+    .wrap { max-width: 720px; margin: 0 auto; padding: 48px 24px; }
+    h1 { font-size: 2.25rem; margin: 0 0 8px; }
+    .tagline { color: var(--muted); font-size: 1.125rem; margin-bottom: 32px; }
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+    .card h2 { margin-top: 0; font-size: 1.125rem; }
+    a.btn {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      text-decoration: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      margin-right: 12px;
+      margin-bottom: 8px;
+    }
+    a.btn.secondary {
+      background: transparent;
+      border: 1px solid var(--muted);
+      color: var(--text);
+    }
+    ul { padding-left: 20px; }
+    footer { margin-top: 32px; color: var(--muted); font-size: 0.875rem; }
+    footer a { color: var(--accent); }
+  </style>
 </head>
 <body>
-  <p>Redirecting to <a href="privacy-policy.html">Privacy Policy</a>...</p>
+  <div class="wrap">
+    <h1>NetProbe</h1>
+    <p class="tagline">Real-time network resource connectivity tester for Android</p>
+
+    <div class="card">
+      <h2>Install</h2>
+      <p>Get NetProbe from Komi Store or GitHub Releases:</p>
+      <a class="btn" href="https://komistore.app/">Komi Store</a>
+      <a class="btn secondary" href="https://github.com/Masterofowls/netprobe/releases/latest">GitHub Releases</a>
+    </div>
+
+    <div class="card">
+      <h2>Features</h2>
+      <ul>
+        <li>Check if websites and services are reachable from your network</li>
+        <li>100+ built-in services plus custom URLs</li>
+        <li>Latency charts, geo IP lookup, and status notifications</li>
+        <li>No analytics or tracking — data stays on your device</li>
+      </ul>
+    </div>
+
+    <footer>
+      <p>
+        <a href="privacy-policy.html">Privacy Policy</a> ·
+        <a href="https://github.com/Masterofowls/netprobe">Source on GitHub</a>
+      </p>
+    </footer>
+  </div>
 </body>
 </html>

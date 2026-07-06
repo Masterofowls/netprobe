@@ -1,6 +1,6 @@
 {
   "name": "@masterofowls/netprobe",
-  "version": "1.5.1",
+  "version": "1.5.3",
   "description": "Real-time Network Resource Connectivity Tester for Android",
   "main": "expo-router/entry",
   "repository": {
