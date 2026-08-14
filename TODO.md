@@ -5,3 +5,5 @@
 5. Add VPN detection 
 6. Add VPN protocol tester
 7. Bulk add sources
+8. Speed measurement
+9. Country info
